@@ -10,9 +10,9 @@
     gtag('config', 'UA-154584969-2');
   </script>
 
-  <title>Kevin Lu</title>
+  <title>Sachin Konan</title>
   
-  <meta name="author" content="Kevin Lu">
+  <meta name="author" content="Sachin Konan">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
   <link rel="stylesheet" type="text/css" href="stylesheet.css">
@@ -20,21 +20,20 @@
 </head>
 
 <body>
-  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+  <table style="width:100%;max-width:900px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
     <tr style="padding:0px">
       <td style="padding:0px">
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
           <tr style="padding:0px">
             <td style="padding:2.5% 2.5% 0;width:63%;vertical-align:middle">
               <p style="text-align:center">
-                <name>Kevin Lu</name>
+                <name>Sachin Konan</name>
               </p>
               <p style="text-align:center">
-                Contact: kzl at berkeley.edu <br>
-                <a href="assets/cv.pdf">CV</a> &nbsp/&nbsp
-                <a href="https://scholar.google.com/citations?user=E8s73dYAAAAJ">Google Scholar</a> &nbsp/&nbsp
-                <a href="https://twitter.com/_kevinlu">Twitter</a> &nbsp/&nbsp
-                <a href="http://www.github.com/kzl">Github</a>
+                Contact: sachin at twosigma.com <br>
+                <a href="assets/research_resume.pdf">CV</a> &nbsp/&nbsp
+                <a href="https://scholar.google.com/citations?user=dxi6F8kAAAAJ&hl=en">Google Scholar</a> &nbsp/&nbsp
+                <a href="https://github.com/SachinKonan">Github</a>
               </p>
             </td>
           </tr>
@@ -43,151 +42,236 @@
           <tr style="padding:0px">
             <td style="padding:0 2.5% 2.5%;width:63%;vertical-align:middle">
               <p>
-                I like training deep learning models for a variety of problems. 
-                Currently, I'm working on some personal projects.
-                I'm in the SF Bay Area: if you'd like to meet, feel free to contact me via email or Twitter!
-              </p>
+                Hi, I am an engineer at Two Sigma Investments, where I work on research and engineering problems related
+                to graphs and automated code generation. I obtained my BS in Computer Science in 2022 from
+                 Georgia Tech.
               <p>
-                Some relevant links to my work:
+                I have been at:
                 <ol>
-                  <li>
-                    sequence modeling for reinforcement learning
-                    <a href="https://arxiv.org/abs/2106.01345">(Decision Transformer)</a>
-                  </li>
-                  <li>
-                    pretrained transformers for cross-modal transfer
-                    <a href="https://arxiv.org/abs/2103.05247">(Universal Computation Engines)</a>
-                  </li>
-                  <li>
-                    talk on universal paradigm for decision making
-                    <a href="https://docs.google.com/presentation/d/1virFAKTNUDzsOG-kxn26T-8yiowg-1nojewk-0xsq3g/edit?usp=sharing">(slides)</a>
-                  </li>
-                </ol>
-              </p>
-              <p>
-                I was previously at:
-                <ol>
-                  <li>Hudson River Trading AI Labs (2022-23)</li>
-                  <li>Facebook AI Research (2021-22)</li>
-                  <li>UC Berkeley (2018-21) &star;</li>
+                  <li>Two Sigma - Graph Perturbation/Differential Privacy</li>
+                  <li>Fundamental AI Research (FAIR) @ Meta - Open World Detection</li>
+                  <li>Intel - Optimizing Neural Network Simulation</li>
+                  <li>Georgia Tech - Single/Multi-Agent Reinforcement Learning (RL) &star;</li>
                 </ol>
                 &star;&nbsp;&nbsp;&nbsp;&nbsp; I was fortunate to be advised by
-                <a href="https://scholar.google.com/citations?user=Vzr1RukAAAAJ&hl=en">Igor Mordatch</a>
-                and <a href="https://people.eecs.berkeley.edu/~pabbeel/">Pieter Abbeel</a>.
+                <a href="https://core-robotics.gatech.edu/people/matthew-gombolay/">Matthew Gombolay</a>. I also worked
+                under <a href="https://sites.cc.gatech.edu/fac/Constantinos.Dovrolis/">Constantinos Dovrolis</a> as a
+                teaching Assistant for <a href="https://gt-cs-3510.github.io/">CS 3510</a>.
               </p>
+              <p>I am interested in scientifically understanding Machine Learning and its applications to
+                reasoning tasks. I want to build deployable ML that can be seamlessly used.</p>
             </td>
             <td style="padding:0 2.5% 2.5%;width:40%;max-width:40%;vertical-align:middle">
-              <a href="assets/profile_picture.jpg"><img style="width:100%;max-width:100%" alt="profile photo" src="assets/profile_picture.jpg" class="hoverZoomLink circle"></a>
+              <a href="assets/me.png"><img style="width:100%;max-width:100%" alt="profile photo" src="assets/me.png" class="hoverZoomLink circle"></a>
             </td>
           </tr>
         </tbody></table>
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-
-          <tr onmouseout="dt_stop()" onmouseover="dt_start()">
+          <tr onmouseout="merge_split_stop()" onmouseover="merge_split_start()">
             <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
               <div class="one">
-                <div class="two" id='dt_image'><img src="images/dt_graph.png" class="icon"></div>
-                <img src="images/dt_architecture.png", class="icon">
+                <div class="two" id='merge_split_1'><img src="images/merge_split_2.png" class="icon"></div>
+                <img id='merge_split_2' src="images/merge_split_1.png" , class="icon">
               </div>
               <script type="text/javascript">
-                function dt_start() {
-                  document.getElementById('dt_image').style.opacity = "1";
+                function merge_split_start() {
+                  document.getElementById('merge_split_1').style.opacity = "1";
                 }
 
-                function dt_stop() {
-                  document.getElementById('dt_image').style.opacity = "0";
+                function merge_split_stop() {
+                  document.getElementById('merge_split_1').style.opacity = "0";
                 }
-                dt_stop()
+                merge_split_stop()
               </script>
             </td>
             <td style="padding:20px;width:75%;vertical-align:middle">
-              <a href="https://arxiv.org/abs/2106.01345">
-                <papertitle>Decision Transformer: Reinforcement Learning via Sequence Modeling</papertitle>
+              <a href="assets/Merge_Split__VLDB_23.pdf">
+                <papertitle>Merge-Split: Directed Graph Perturbations that Preserve Random Walk Structure</papertitle>
               </a>
               <br>
-              <a href="http://www.lilichen.me/">Lili Chen*</a>,
-              <strong>Kevin Lu*</strong>,
-              <a href="https://homes.cs.washington.edu/~aravraj/">Aravind Rajeswaran</a>,
-              <a href="https://sites.google.com/view/kiminlee">Kimin Lee</a>,
-              <a href="https://aditya-grover.github.io/">Aditya Grover</a>,
-              <a href="https://www.mishalaskin.com/edaaae9ed2b54016a66a0e315a9c9f63">Michael Laskin</a>,
-              <a href="https://people.eecs.berkeley.edu/~pabbeel/">Pieter Abbeel</a>,
-              <a href="https://people.eecs.berkeley.edu/~aravind/">Aravind Srinivas*</a>,
-              <a href="https://scholar.google.com/citations?user=Vzr1RukAAAAJ&hl=en">Igor Mordatch*</a>
+              <strong>Sachin Konan*</strong>,
+              <a href="https://people.csail.mit.edu/rudolph/">Larry Rudolph</a>,
               <br>
-              <em>Neural Information Processing Systems (NeurIPS)</em>, 2021
+              <em>Very Large DataBases (VLDB)</em>, 2024 (in Review)
               <br>
-              Official:
-              <a href="https://arxiv.org/abs/2106.01345/">arXiv</a> /
-              <a href="https://sites.google.com/berkeley.edu/decision-transformer">website</a> /
-              <a href="https://neurips.cc/media/PosterPDFs/NeurIPS%202021/7f489f642a0ddb10272b5c31057f0663_DyssJRO.png">poster</a> /
-              <a href="https://twitter.com/IMordatch/status/1400113795196809227">tweet</a> /
-              <a href="https://github.com/kzl/decision-transformer">code</a>
-              <br>
-              Press:
-              <a href="https://info.deeplearning.ai/the-batch-bias-in-predictive-policing-timnit-gebru-vs-corporate-ai-autism-recognized-transformers-for-reinforcement-learning">The Batch article</a> /
-              <a href="https://syncedreview.com/2021/06/09/deepmind-podracer-tpu-based-rl-frameworks-deliver-exceptional-performance-at-low-cost-37/">SyncedReview article</a> /
-              <a href="https://thegradientpub.substack.com/p/update-3-new-in-reinforcement-learning">The Gradient article</a> /
-              <a href="https://www.youtube.com/watch?v=-buULmf7dec&ab_channel=YannicKilcher">Yannic Kilcher video</a> /
-              <a href="https://youtu.be/83QN9S-0I84">Eindhoven RL seminar</a>
-            </td>
-          </tr>
-
-          <tr onmouseout="fpt_stop()" onmouseover="fpt_start()">
-            <td style="padding:20px;width:25%;vertical-align:middle">
-              <div class="one">
-                <div class="two" id='fpt_image'><img src="images/fpt_xor.png" class="icon"></div>
-                <img src="images/fpt_bar.png", class="icon">
-              </div>
-              <script type="text/javascript">
-                function fpt_start() {
-                  document.getElementById('fpt_image').style.opacity = "1";
-                }
-
-                function fpt_stop() {
-                  document.getElementById('fpt_image').style.opacity = "0";
-                }
-                fpt_stop()
-              </script>
-            </td>
-            <td style="padding:20px;width:75%;vertical-align:middle">
-              <a href="https://arxiv.org/abs/2103.05247">
-                <papertitle>Pretrained Transformers as Universal Computation Engines</papertitle>
-              </a>
-              <br>
-              <strong>Kevin Lu</strong>,
-              <a href="https://aditya-grover.github.io/">Aditya Grover</a>,
-              <a href="https://people.eecs.berkeley.edu/~pabbeel/">Pieter Abbeel</a>,
-              <a href="https://scholar.google.com/citations?user=Vzr1RukAAAAJ&hl=en">Igor Mordatch</a>
-              <br>
-              <em>AAAI Conference on Artificial Intelligence</em>, 2022
-              <br>
-              Official:
-              <a href="https://arxiv.org/abs/2103.05247">arXiv</a> /
-              <a href="https://bair.berkeley.edu/blog/2021/03/23/universal-computation/">blog</a> /
-              <a href="assets/fpt_poster_aaai.pdf">poster</a> /
-              <a href="https://twitter.com/IMordatch/status/1369688157558431749">tweet</a> /
-              <a href="https://github.com/kzl/universal-computation">code</a>
-              <br>
-              Press:
-              <a href="https://read.deeplearning.ai/the-batch/issue-102/">The Batch article</a> /
-              <a href="https://venturebeat.com/2021/03/11/hugging-face-triples-investment-in-open-source-machine-learning-models/">VentureBeat article</a> /
-              <a href="https://www.youtube.com/watch?v=69paLneM6LU">TWIML podcast</a> /
-              <a href="https://www.youtube.com/watch?v=Elxn8rS88bI&ab_channel=YannicKilcher">Yannic Kilcher video</a>
-            </td>
-          </tr>
-        </tbody></table>
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-          <tr style="padding:0px">
-            <td style="padding:2.5% 2.5% 0;width:63%;vertical-align:left">
               <p>
-                Back when I was a TA at Berkeley, I wrote a
-                <a href="https://inst.eecs.berkeley.edu/~ee126/sp21/exam/final_study_guide.pdf">study guide</a>
-                for our course on Probability and Random Processes.
+                <strong> TLDR;</strong>
+                Directed Graphs contain important dependencies and whose structure may be sensitive. Previous work has shown
+                that node deanonymization <a href="https://www.cs.utexas.edu/~shmat/shmat_oak09.pdf">isn't enough</a>
+                so we protect against subgraph isomorphism and <a href="https://en.wikipedia.org/wiki/Sybil_attack">
+                Sybil attacks</a> through the use of random perturbations (Merge-Split). For usability, the perturbed graph has to
+                maintain similarity to the original, which is achieved by minimizing the change in the graph's eigenspace. Our
+                experiments showed that Merge-Split locally disrupts random walks while maintaining overall structural
+                properties, like the graph's steady-state distribution.
               </p>
             </td>
           </tr>
-        </tbody></table>
+
+          <tr onmouseout="condt_stop()" onmouseover="condt_start()">
+            <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
+              <div class="one">
+                <img class="two"  id='condt_2' src="images/condt_arch.png", class="icon" style="width:180px;height:120px">
+                <div id='condt_1'><video  width=100% height=100% muted autoplay loop>
+                  <source src="images/condt_vid.mov" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video></div>
+              </div>
+              <script type="text/javascript">
+                function condt_stop() {
+                  document.getElementById('condt_1').style.opacity = "1";
+                  document.getElementById('condt_2').style.opacity = "0";
+                }
+
+                function condt_start() {
+                  document.getElementById('condt_1').style.opacity = "0";
+                  document.getElementById('condt_2').style.opacity = "1";
+                }
+                condt_start()
+              </script>
+            </td>
+            <td style="padding:20px;width:75%;vertical-align:middle">
+              <a href="https://proceedings.mlr.press/v205/konan23a/konan23a.pdf">
+                <papertitle>Contrastive Decision Transformer</papertitle>
+              </a>
+              <br>
+              <strong>Sachin Konan*</strong>,
+              <a href="https://esmaeilseraj09.wixsite.com/home">Esmaeil Seraj</a>,
+              <a href="https://core-robotics.gatech.edu/people/matthew-gombolay/">Matthew Gombolay</a>
+              <br>
+              <em>Conference on Robot Learning</em>, 2023
+              <br>
+              Official:
+              <a href="https://proceedings.mlr.press/v205/konan23a/konan23a.pdf">PMLR</a> /
+              <a href="https://youtu.be/rK_itCF9hPc?si=x6vTyEqJFigVbsZ1">Video</a> /
+              <a href="assets/condt.pdf">Poster</a>
+              <br>
+              <p>
+                <strong> TLDR;</strong>
+                <a href="https://arxiv.org/abs/2106.01345"> Decision Transformer </a> (DT) is a return-conditioned system
+                that generates the action that will achieve a desired return in a given state. Achieving high
+                return should theoretically require drastically different behavior than low return. In the same way that
+                search is optimized through indexing, ConDT organizes state-action embeddings by return, allowing the transformer
+                to more easily "recall" the necessary action for that return. ConDT improves performance in
+                Gym, Atari, and hand-grip tasks.
+              </p>
+            </td>
+          </tr>
+
+          <tr onmouseout="infopg_stop()" onmouseover="infopg_start()">
+            <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
+              <div class="one">
+                <div class="two" id='infopg_2'><video  width=100% height=100% muted autoplay loop>
+                  <source src="images/pong.mov" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video></div>
+                <div id='infopg_1'><video  width=100% height=100% muted autoplay loop>
+                  <source src="images/walker.mov" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video></div>
+              </div>
+              <script type="text/javascript">
+                function infopg_start() {
+                  document.getElementById('infopg_1').style.opacity = "1";
+                  document.getElementById('infopg_2').style.opacity = "0";
+                }
+
+                function infopg_stop() {
+                  document.getElementById('infopg_1').style.opacity = "0";
+                  document.getElementById('infopg_2').style.opacity = "1";
+                }
+                infopg_stop()
+              </script>
+            </td>
+            <td style="padding:20px;width:75%;vertical-align:middle">
+              <a href="https://arxiv.org/abs/2201.08484">
+                <papertitle>Iterated reasoning with mutual information in cooperative and byzantine decentralized Teaming</papertitle>
+              </a>
+              <br>
+              <strong>Sachin Konan*</strong>,
+              <a href="https://people.csail.mit.edu/rudolph/">Esmaeil Seraj*</a>,
+              <a href="https://core-robotics.gatech.edu/people/matthew-gombolay/">Matthew Gombolay</a>
+              <br>
+              <em>International Conference on Learning Representations</em>, 2022
+              <br>
+              Official:
+              <a href="https://arxiv.org/abs/2201.08484">arXiv</a> /
+              <a href="https://www.cc.gatech.edu/news/new-framework-mimics-high-functioning-human-teams-decreases-risks-unreliable-bots">Blog</a> /
+              <a href="assets/infopg.pdf">Poster</a> /
+              <a href="https://iclr.cc/virtual/2022/poster/6808">Presentation</a> /
+              <a href="https://www.youtube.com/watch?v=rK_itCF9hPc&ab_channel=EsmaeilSeraj">Video</a>
+              <br>
+              <p>
+                <strong> TLDR;</strong>
+                Collaborative teaming in multi-agent RL is challenging because agents need to consider the conditionality
+                of their actions, which exponentially grows in complexity with the size of the action space and the number
+                of agents. Humans excel at learning this conditionality by <a href="https://en.wikipedia.org/wiki/Cognitive_hierarchy_theory">recursively reasoning</a>
+                about the actions of others, like in chess where a player A recursively considers how their player B
+                considers how player A, and so on. We formulated a multi-agent policy gradient (InfoPG) that fosters this
+                type of reasoning by maximizing inter-agent mutual information. InfoPG improves team-performance in Gym
+                and Starcraft cooperative games and is robust to adversarial team-mates (Byzantine Generals Problem).
+              </p>
+            </td>
+          </tr>
+
+          <tr onmouseout="infopg_stop()" onmouseover="infopg_start()">
+            <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
+              <div class="one">
+                <div class="two" id='owd_2'><img src="images/merge_split_2.png" class="icon"></div>
+                <img id='owd_1' src="images/merge_split_1.png" , class="icon">
+              </div>
+              <script type="text/javascript">
+                function infopg_start() {
+                  document.getElementById('infopg_1').style.opacity = "1";
+                  document.getElementById('infopg_2').style.opacity = "0";
+                }
+
+                function infopg_stop() {
+                  document.getElementById('infopg_1').style.opacity = "0";
+                  document.getElementById('infopg_2').style.opacity = "1";
+                }
+                infopg_stop()
+              </script>
+            </td>
+            <td style="padding:20px;width:75%;vertical-align:middle">
+              <br>
+              <a href="https://arxiv.org/abs/2201.02302">
+                <papertitle>Extending one-stage detection with open-world proposals</papertitle>
+              </a>
+              <br>
+              <strong>Sachin Konan*</strong>,
+              <a href="https://kevinjliang.github.io/">Kevin J Liang</a>,
+              <a href="">Li Yin</a>
+              <br>
+              <em>arXiv pre-print</em>, 2022
+              <br>
+              <p>
+                <strong> TLDR;</strong>
+                Object Detection consists of the localization and classification of objects, and two-stage networks made
+                this process conditional. However, in practice, one might want to localize any object, regardless of
+                whether it can be classified (this is called
+                <a href="https://openaccess.thecvf.com/content/CVPR2021/papers/Joseph_Towards_Open_World_Object_Detection_CVPR_2021_paper.pdf">Open World Detection</a> (OWD)).
+                Previously, two-stage networks have been studied, but we investigate a one-stage network called
+                <a href="https://arxiv.org/abs/1904.01355">FCOS</a> for its simplicity and decoupling of classification
+                from localization. We investigate various architectural and sampling improvements that allow FCOS to
+                retain is classification ability, while improving localization recall.
+              </p>
+            </td>
+          </tr>
+        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+          <tbody>
+            <tr style="padding:0px">
+              <td style="padding:2.5% 2.5% 0;width:63%;vertical-align:left">
+                <p>
+                  Also, I recently wrote a <a href="https://www.twosigma.com/articles/semantic-types-from-computer-centric-to-human-centric-data-types/">blog post</a>
+                  about the benefits of migrating datatable schemas from primitive data-types to entity-driven data-types,
+                  called Semantic Types. We are investigating the usage of LLMs to automatically generate Semantic Type definitions and
+                  data processing code.
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
   
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
           <tr>
