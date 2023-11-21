@@ -216,18 +216,18 @@
           <tr onmouseout="infopg_stop()" onmouseover="infopg_start()">
             <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
               <div class="one">
-                <div class="two" id='owd_2'><img src="images/merge_split_2.png" class="icon"></div>
-                <img id='owd_1' src="images/merge_split_1.png" , class="icon">
+                <div class="two" id='owd_2'><img src="images/owd_1.png" class="icon"></div>
+                <img id='owd_1' src="images/owd_2.png" , class="icon">
               </div>
               <script type="text/javascript">
                 function infopg_start() {
-                  document.getElementById('infopg_1').style.opacity = "1";
-                  document.getElementById('infopg_2').style.opacity = "0";
+                  document.getElementById('owd_1').style.opacity = "1";
+                  document.getElementById('owd_2').style.opacity = "0";
                 }
 
                 function infopg_stop() {
-                  document.getElementById('infopg_1').style.opacity = "0";
-                  document.getElementById('infopg_2').style.opacity = "1";
+                  document.getElementById('owd_1').style.opacity = "0";
+                  document.getElementById('owd_2').style.opacity = "1";
                 }
                 infopg_stop()
               </script>
