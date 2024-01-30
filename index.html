@@ -75,6 +75,46 @@
           </tr>
         </tbody></table>
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+          <tr onmouseout="fst_stop()" onmouseover="fst_start()">
+            <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
+              <div class="one">
+                <div class="two" id='fst_1'><img src="images/fst_2.png" class="icon"></div>
+                <img id='fst_2' src="images/fst_1.png" , class="icon">
+              </div>
+              <script type="text/javascript">
+                  function fst_start() {
+                    document.getElementById('fst_1').style.opacity = "1";
+                  }
+
+                  function fst_stop() {
+                    document.getElementById('fst_1').style.opacity = "0";
+                  }
+                  merge_split_stop()
+                </script>
+            </td>
+            <td style="padding:20px;width:75%;vertical-align:middle">
+              <a>
+                <papertitle>Automating the Generation of Functional Semantic Types with Foundational Models</papertitle>
+              </a>
+              <br>
+              <strong>Sachin Konan*</strong>,
+              <a href="https://people.csail.mit.edu/rudolph/">Larry Rudolph</a>,
+              <a>Scott Affens</a>
+              <br>
+              <em>North American Chapter of the Association for Computational Linguistics (NAACL)</em>, 2024 (in Review)
+              <br>
+              <p>
+                <strong> TLDR;</strong>
+                The proliferation of vast data providers and inherent dirtiness of data have increased the value proposition
+                of Semantic Types. We introduce the concept of Functional Semantic Types (FST)s which are Python classes
+                that encapsulate the informational and functional context of columnar data. FSTs will normalize and validate
+                data in a structured/readable manner, allowing automated cross-table joins or fast lookups. In order to
+                scale the generation of FSTs, we leverage Foundational Models to transform serialized data-tables to FSTs.
+                Across Kaggle, Harvard, and FactSet Data-Verses we show our method FSTO-Gen, can generate functionally and
+                informationally correct FSTs.
+              </p>
+            </td>
+          </tr>
           <tr onmouseout="merge_split_stop()" onmouseover="merge_split_start()">
             <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
               <div class="one">
@@ -93,7 +133,7 @@
               </script>
             </td>
             <td style="padding:20px;width:75%;vertical-align:middle">
-              <a href="assets/Merge_Split__VLDB_23.pdf">
+              <a>
                 <papertitle>Merge-Split: Directed Graph Perturbations that Preserve Random Walk Structure</papertitle>
               </a>
               <br>
