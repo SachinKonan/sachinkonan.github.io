@@ -1,0 +1,19 @@
+# Random files
+**/.DS_STORE
+**/*.pyc
+**/*.swp
+MANIFEST
+*.egg-info
+\.idea/
+/.idea
+MUJOCO_LOG.TXT
+
+# Directories with lfrl logging
+/agent_data
+/data
+/misc
+/video
+/wandb
+
+# Private credentials
+/docker/mjkey.txt
