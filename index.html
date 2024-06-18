@@ -37,7 +37,6 @@
                 <name>Sachin Konan</name>
               </p>
               <p style="text-align:center">
-                Contact: sachin at twosigma.com <br>
                 <a href="assets/research_resume.pdf">CV</a> &nbsp/&nbsp
                 <a href="https://scholar.google.com/citations?user=dxi6F8kAAAAJ&hl=en">Google Scholar</a>
               </p>
@@ -54,7 +53,7 @@
               <p>
                 I have been at:
                 <ol>
-                  <li>Two Sigma - Graph Perturbation/Differential Privacy</li>
+                  <li>Two Sigma - LLM Systems and Finetuning/Synthetic Graph Generation</li>
                   <li>Fundamental AI Research (FAIR) @ Meta - Open World Detection</li>
                   <li>Intel - Optimizing Neural Network Simulation</li>
                   <li>Georgia Tech - Single/Multi-Agent Reinforcement Learning (RL) &star;</li>
@@ -65,7 +64,7 @@
                 teaching Assistant for <a href="https://gt-cs-3510.github.io/">CS 3510</a>.
               </p>
               <p>I am interested in scientifically understanding Machine Learning and its applications to
-                reasoning tasks. I want to build deployable ML that can be seamlessly used.</p>
+                reasoning tasks. I am also interested in efficient training of large models.</p>
             </td>
             <td style="padding:0 2.5% 2.5%;width:40%;max-width:40%;vertical-align:middle">
               <a href="assets/me.jpeg"><img style="width:100%;max-width:100%" alt="profile photo" src="assets/me.jpeg" class="hoverZoomLink circle"></a>
@@ -102,7 +101,7 @@
               <a href="https://people.csail.mit.edu/rudolph/">Larry Rudolph</a>,
               <a>Scott Affens</a>
               <br>
-              <em>North American Chapter of the Association for Computational Linguistics (NAACL)</em>, 2024 (In Preparation)
+              <em>North American Chapter of the Association for Computational Linguistics (NAACL)</em>, 2024
               <br>
               <p>
                 <strong> TLDR;</strong>
@@ -116,47 +115,7 @@
               </p>
             </td>
           </tr>
-          <tr onmouseout="merge_split_stop()" onmouseover="merge_split_start()">
-            <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
-              <div class="one">
-                <div class="two" id='merge_split_1'><img src="images/merge_split_2.png" class="icon"></div>
-                <img id='merge_split_2' src="images/merge_split_1.png" , class="icon">
-              </div>
-              <script type="text/javascript">
-                function merge_split_start() {
-                  document.getElementById('merge_split_1').style.opacity = "1";
-                }
-
-                function merge_split_stop() {
-                  document.getElementById('merge_split_1').style.opacity = "0";
-                }
-                merge_split_stop()
-              </script>
-            </td>
-            <td style="padding:20px;width:75%;vertical-align:middle">
-              <a>
-                <papertitle>Merge-Split: Directed Graph Perturbations that Preserve Random Walk Structure</papertitle>
-              </a>
-              <br>
-              <strong>Sachin Konan*</strong>,
-              <a href="https://people.csail.mit.edu/rudolph/">Larry Rudolph</a>,
-              <br>
-              <em>Very Large DataBases (VLDB)</em>, 2024 (In Review)
-              <br>
-              <p>
-                <strong> TLDR;</strong>
-                Directed Graphs contain important dependencies and whose structure may be sensitive. Previous work has shown
-                that node deanonymization <a href="https://www.cs.utexas.edu/~shmat/shmat_oak09.pdf">isn't enough</a>
-                so we protect against subgraph isomorphism and <a href="https://en.wikipedia.org/wiki/Sybil_attack">
-                Sybil attacks</a> through the use of random perturbations (Merge-Split). For usability, the perturbed graph has to
-                maintain similarity to the original, which is achieved by minimizing the change in the graph's eigenspace. Our
-                experiments showed that Merge-Split locally disrupts random walks while maintaining overall structural
-                properties, like the graph's steady-state distribution.
-              </p>
-            </td>
-          </tr>
-
-          <tr onmouseout="condt_stop()" onmouseover="condt_start()">
+          <tr onmouseover="condt_start()">
             <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
               <div class="one">
                 <img class="two"  id='condt_2' src="images/condt_arch.png", class="icon" style="width:180px;height:120px">
@@ -166,14 +125,9 @@
                 </video></div>
               </div>
               <script type="text/javascript">
-                function condt_stop() {
+                function condt_start() {
                   document.getElementById('condt_1').style.opacity = "1";
                   document.getElementById('condt_2').style.opacity = "0";
-                }
-
-                function condt_start() {
-                  document.getElementById('condt_1').style.opacity = "0";
-                  document.getElementById('condt_2').style.opacity = "1";
                 }
                 condt_start()
               </script>
@@ -259,7 +213,45 @@
               </p>
             </td>
           </tr>
+          <tr onmouseout="merge_split_stop()" onmouseover="merge_split_start()">
+            <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
+              <div class="one">
+                <div class="two" id='merge_split_1'><img src="images/merge_split_2.png" class="icon"></div>
+                <img id='merge_split_2' src="images/merge_split_1.png" , class="icon">
+              </div>
+              <script type="text/javascript">
+                function merge_split_start() {
+                  document.getElementById('merge_split_1').style.opacity = "1";
+                }
 
+                function merge_split_stop() {
+                  document.getElementById('merge_split_1').style.opacity = "0";
+                }
+                merge_split_stop()
+              </script>
+            </td>
+            <td style="padding:20px;width:75%;vertical-align:middle">
+              <a>
+                <papertitle>Merge-Split: Directed Graph Perturbations that Preserve Random Walk Structure</papertitle>
+              </a>
+              <br>
+              <strong>Sachin Konan*</strong>,
+              <a href="https://people.csail.mit.edu/rudolph/">Larry Rudolph</a>,
+              <br>
+              <em>In Preparation for arXiv preprint</em>, 2024
+              <br>
+              <p>
+                <strong> TLDR;</strong>
+                Directed Graphs contain important dependencies and whose structure may be sensitive. Previous work has shown
+                that node deanonymization <a href="https://www.cs.utexas.edu/~shmat/shmat_oak09.pdf">isn't enough</a>
+                so we protect against subgraph isomorphism and <a href="https://en.wikipedia.org/wiki/Sybil_attack">
+                Sybil attacks</a> through the use of random perturbations (Merge-Split). For usability, the perturbed graph has to
+                maintain similarity to the original, which is achieved by minimizing the change in the graph's eigenspace. Our
+                experiments showed that Merge-Split locally disrupts random walks while maintaining overall structural
+                properties, like the graph's steady-state distribution.
+              </p>
+            </td>
+          </tr>
           <tr onmouseout="infopg_stop()" onmouseover="infopg_start()">
             <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
               <div class="one">
