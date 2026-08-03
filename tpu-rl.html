@@ -1,0 +1,1376 @@
+<!DOCTYPE HTML>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6M930EY73V"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-6M930EY73V');
+  </script>
+
+  <title>Tinker API Implementation on TPUs, 30B models and up to 20k context — Sachin Konan</title>
+  <meta name="author" content="Sachin Konan">
+  <meta name="description" content="Building a reinforcement-learning stack for large language models on TPU v5p: SkyRL, MaxText, tunix, vLLM, and the memory engineering behind going from 512 to 22,528 tokens.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="stylesheet.css">
+  <link rel="icon" type="image/png" href="images/seal_icon.png">
+
+<style>
+  :root{
+    --ink:#1a1a1a; --ink-2:#4a4a4a; --ink-3:#7a7a7a;
+    --rule:#e2e2e2; --paper:#ffffff; --panel:#fafafa;
+    --link:#1772d0; --hot:#f09228;
+    --chip:#1772d0; --host:#eef4fc;
+  }
+  body{margin:0;background:var(--paper);color:var(--ink);}
+  .shell{max-width:1180px;margin:0 auto;padding:0 24px;
+         display:grid;grid-template-columns:220px minmax(0,1fr);gap:44px;}
+  @media (max-width:900px){ .shell{grid-template-columns:1fr;gap:0;} nav.toc{position:static !important;max-height:none !important;border-right:0 !important;padding:12px 0 !important;margin-bottom:12px;border-bottom:1px solid var(--rule);} }
+
+  /* ---- sidebar table of contents ---- */
+  nav.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+          padding:34px 14px 34px 0;border-right:1px solid var(--rule);}
+  nav.toc .lbl{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;}
+  nav.toc a{display:block;font-size:13px;line-height:1.35;color:var(--ink-2);padding:4px 0;border-left:2px solid transparent;padding-left:9px;}
+  nav.toc a:hover{color:var(--hot);}
+  nav.toc a.sub{font-size:12.5px;padding-left:20px;color:var(--ink-3);}
+  nav.toc a.on{color:var(--link);border-left-color:var(--link);}
+  nav.toc .home{margin-bottom:16px;font-size:13px;}
+  nav.toc>a{margin-left:20px;}
+  nav.toc .row{display:flex;align-items:center;}
+  nav.toc .row>a{flex:1;min-width:0;}
+  nav.toc .tw{flex:0 0 20px;width:20px;height:22px;padding:0;border:0;background:none;cursor:pointer;
+              color:#8a8a8a;font-size:14px;line-height:22px;text-align:left;
+              transition:transform .16s ease,color .16s ease;transform-origin:6px 11px;}
+  nav.toc .tw:hover{color:var(--hot);}
+  nav.toc .tw.open{transform:rotate(90deg);color:var(--link);}
+  nav.toc .kids{display:none;margin-left:20px;}
+  nav.toc .kids.open{display:block;}
+
+  /* ---- article ---- */
+  article{padding:34px 0 90px;max-width:760px;}
+  article h1{font-family:'Lato',sans-serif;font-size:33px;font-weight:700;line-height:1.18;margin:0 0 10px;}
+  article .standfirst{font-size:16px;line-height:1.6;color:var(--ink-2);margin:0 0 6px;}
+  article .byline{font-size:13px;color:var(--ink-3);margin:14px 0 30px;padding-bottom:22px;border-bottom:1px solid var(--rule);}
+  article h2{font-family:'Lato',sans-serif;font-size:23px;font-weight:700;margin:46px 0 12px;padding-top:8px;}
+  article h3{font-family:'Lato',sans-serif;font-size:16.5px;font-weight:700;margin:30px 0 8px;color:var(--ink);}
+  article p{font-size:15px;line-height:1.68;margin:0 0 15px;}
+  article li{font-size:15px;line-height:1.62;margin-bottom:7px;}
+  article ul,article ol{padding-left:22px;margin:0 0 15px;}
+  article strong{font-size:inherit;font-weight:700;}
+  code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12.9px;
+       background:#f3f3f3;padding:1px 5px;border-radius:3px;color:#333;}
+  pre{background:#fbfbfb;border:1px solid var(--rule);border-left:3px solid var(--link);
+      border-radius:4px;padding:13px 15px;overflow-x:auto;margin:0 0 16px;}
+  pre code{background:none;padding:0;font-size:12.6px;line-height:1.55;color:#2a2a2a;}
+
+  /* formula block */
+  .fml{background:var(--panel);border:1px solid var(--rule);border-radius:5px;
+       padding:14px 18px;margin:0 0 16px;font-family:ui-monospace,Menlo,monospace;
+       font-size:13.4px;line-height:1.85;color:#222;overflow-x:auto;}
+  .fml .c{color:var(--ink-3);}
+  .fml b{color:var(--link);font-weight:700;}
+
+  /* tables */
+  table.d{border-collapse:collapse;width:100%;margin:0 0 18px;font-size:13.6px;
+          font-variant-numeric:tabular-nums;display:block;overflow-x:auto;}
+  table.d th{text-align:left;font-weight:700;border-bottom:2px solid #d8d8d8;padding:7px 11px 7px 0;font-size:12.5px;
+             letter-spacing:.02em;color:var(--ink-2);white-space:nowrap;}
+  table.d td{border-bottom:1px solid #efefef;padding:7px 11px 7px 0;vertical-align:top;}
+  table.d tr:last-child td{border-bottom:0;}
+  .num{text-align:right;}
+  .good{color:#127a3d;font-weight:700;}
+  .bad{color:#b3261e;font-weight:700;}
+
+  /* callouts */
+  .cook{background:#f7fbff;border:1px solid #d3e4f7;border-radius:5px;padding:16px 18px;margin:22px 0;}
+  .cook .tag{display:inline-block;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+             color:#fff;background:var(--link);padding:2px 8px;border-radius:3px;margin-bottom:10px;}
+  .cook p{font-size:14px;margin-bottom:10px;}
+  .cook pre{background:#fff;border-color:#d3e4f7;}
+  .note{border-left:3px solid var(--hot);background:#fffdf7;padding:12px 16px;margin:20px 0;font-size:14.2px;line-height:1.62;}
+  .note b{color:#a8620d;}
+  figure{margin:26px 0;}
+  figure img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:4px;}
+  figcaption{font-size:12.8px;color:var(--ink-3);line-height:1.55;margin-top:9px;}
+  .src{font-size:12.5px;color:var(--ink-3);margin:-8px 0 16px;}
+  .src code{font-size:12px;background:#f6f6f6;}
+</style>
+</head>
+
+<body>
+<div class="shell">
+
+<nav class="toc">
+  <div class="home"><a href="index.html">&larr; Sachin Konan</a></div>
+  <div class="lbl">Contents</div>
+  <a href="#machine">1. The machine</a>
+  <div class="grp">
+    <div class="row"><button class="tw" type="button" aria-expanded="false" aria-label="Show subsections">&#9656;</button><a href="#why">2. Why a new backend</a></div>
+    <div class="kids">
+      <a href="#kernels" class="sub">TPU kernels</a>
+      <a href="#mesh" class="sub">The device mesh</a>
+    </div>
+  </div>
+  <a href="#shard">3. How the model is split</a>
+  <div class="grp">
+    <div class="row"><button class="tw" type="button" aria-expanded="false" aria-label="Show subsections">&#9656;</button><a href="#backend">4. The Tunix backend</a></div>
+    <div class="kids"><a href="#whyapi" class="sub">Why not Tunix directly?</a></div>
+  </div>
+  <div class="grp">
+    <div class="row"><button class="tw" type="button" aria-expanded="false" aria-label="Show subsections">&#9656;</button><a href="#sampling">5. Sampling with vLLM</a></div>
+    <div class="kids"><a href="#vllmshard" class="sub">How the sampler splits</a></div>
+  </div>
+  <a href="#cache">6. Caching &amp; preemption</a>
+  <div class="grp">
+    <div class="row"><button class="tw" type="button" aria-expanded="false" aria-label="Show subsections">&#9656;</button><a href="#loop">7. Sync &rarr; pipelined</a></div>
+    <div class="kids"><a href="#util" class="sub">Utilization</a></div>
+  </div>
+  <a href="#models">8. Qwen3.5 in MaxText</a>
+  <div class="grp">
+    <div class="row"><button class="tw" type="button" aria-expanded="false" aria-label="Show subsections">&#9656;</button><a href="#results">9. Results</a></div>
+    <div class="kids"><a href="#refcheck" class="sub">Against a published reference</a></div>
+  </div>
+  <div class="grp">
+    <div class="row"><button class="tw" type="button" aria-expanded="false" aria-label="Show subsections">&#9656;</button><a href="#long">10. The 22k wall</a></div>
+    <div class="kids">
+      <a href="#memgoes" class="sub">Where memory goes</a>
+      <a href="#f1" class="sub">1 &middot; Scoring on-trainer</a>
+      <a href="#f2" class="sub">2 &middot; Budget packing</a>
+      <a href="#f3" class="sub">3 &middot; Logsumexp identity</a>
+      <a href="#f4" class="sub">4 &middot; Fused linear CE</a>
+      <a href="#f5" class="sub">5 &middot; One compiled shape</a>
+      <a href="#f6" class="sub">6 &middot; The leak</a>
+    </div>
+  </div>
+  <a href="#cookbook">11. Cookbook</a>
+  <div class="grp">
+    <div class="row"><button class="tw" type="button" aria-expanded="false" aria-label="Show subsections">&#9656;</button><a href="#next">12. What next</a></div>
+    <div class="kids">
+      <a href="#moe" class="sub">MoE &amp; adapter binding</a>
+      <a href="#nans" class="sub">The instability</a>
+      <a href="#bigger" class="sub">Larger models</a>
+    </div>
+  </div>
+</nav>
+
+<article>
+
+<h1>Tinker API Implementation on TPUs, 30B models and up to 20k context</h1>
+<p class="standfirst">Why I built a train-and-serve backend for the Tinker API on TPUs, and what
+it takes to run reinforcement learning on a 27-billion-parameter model at a 22,528-token context
+on a single v5p slice.</p>
+<p class="byline">Sachin Konan · Princeton University</p>
+
+<p>Really hard problems need a base model that already knows things: complex techniques, how to
+write good code, how to reason correctly. A 4B or 8B model does not clear that bar, and RL cannot
+supply what is missing — it can only reward attempts the model was already capable of making. So
+the starting point has to be around 30B.</p>
+
+<figure>
+<img src="assets/img/gemma4-elo-size.svg" alt="Chat-preference Elo plotted against model size, from Google DeepMind's Gemma 4 release: mid-size models sit close to models an order of magnitude larger.">
+<figcaption><b>Capability does not scale linearly with parameter count.</b> Google DeepMind's
+figure from the Gemma 4 release plots chat-preference Elo against model size; a 31B model lands
+close to models an order of magnitude larger. Around 30B is where a model is good enough to
+attempt these problems and still fits on hardware I can actually get.
+<a href="https://deepmind.google/models/gemma/">Source: Google DeepMind</a>.</figcaption>
+</figure>
+
+<p>Training a model that size used to mean full fine-tuning and the memory that comes with it.
+LoRA avoids that, and for RL it costs little: the update signal is sparse, because a whole rollout
+reduces to one score. <a href="https://thinkingmachines.ai/blog/lora/">Thinking Machines' analysis</a>
+found LoRA matching full fine-tuning on policy-gradient RL even at very low rank.</p>
+
+<p>Then there is the hardware. GPUs at this scale are hard to get. TPUs are easier, and the
+interconnect suits the job: chips are wired into a torus, so allocating a few dozen at once is
+normal, and the bandwidth between them is high enough to split a model across a host.</p>
+
+<p>For the software I wanted the <a href="https://tinker-docs.thinkingmachines.ai/">Tinker API</a>.
+It is a small set of verbs, the algorithm stays in ordinary Python, and nothing in it refers to
+devices or meshes. But the hosted service is billed by usage, and most research runs get thrown
+away — sweeps, ablations, repeated attempts at a prompt format. That gets expensive.</p>
+
+<p>In order to progress my research, I began working on
+<a href="https://github.com/SachinKonan/SkyRLTpu">this fork</a> of
+<a href="https://github.com/NovaSky-AI/SkyRL">SkyRL</a>, which enables 30B model training at up to
+20k context. The client code is unchanged; underneath it a MaxText model shards across one v5p
+host and vLLM serves from the others. Most of the difficulty was memory, which is the last third
+of this post.</p>
+
+<p>Most of that work was memory, though not all of it. The pieces that mattered:</p>
+
+<ul>
+  <li><strong>Fused linear cross-entropy, with a hand-written gradient.</strong> At 20k tokens the
+  logits alone are 81.4 GB per chip, so the loss is computed in vocabulary tiles that are built,
+  read, and discarded — peak 2.0 GB, constant in context length. Tiling the forward pass is not
+  enough: ordinary reverse-mode autodiff saves each tile's output to reuse in the backward pass and
+  quietly reassembles the whole tensor. The fix is a <code>jax.custom_vjp</code>, which replaces
+  the reverse-mode rule JAX would derive with one that keeps only the hidden states and recomputes
+  each tile on the way back.</li>
+  <li><strong>One compiled shape for the entire run.</strong> XLA compiles a separate program per
+  tensor shape and reserves a block of memory for each. Bucketing sequences to waste less padding
+  cut padding from 60% to 22% and killed the run anyway, because six shapes meant six blocks.</li>
+  <li><strong>A leak inside MaxText.</strong> It records intermediate activations that outlive each
+  compiled call — about 168 MB per tile, accumulating until no long run survived. Found by
+  instrumentation, not by reading code.</li>
+  <li><strong>Qwen3.5 as a dense model in MaxText, which did not exist.</strong> A fork: dense-MLP
+  decoder branch, model config, checkpoint converter, and two numerical bugs a normal-looking run
+  would have hidden — the final norm needs Qwen3.5's zero-centered form, and mRoPE has to be off
+  for text-only input.</li>
+  <li><strong>Adapter updates on a running vLLM.</strong> In RL the policy changes every step, so
+  the sampler has to pick up new weights constantly and restarting a server each time would
+  dominate the budget. TPU vLLM had no runtime-LoRA path, so that meant a fork of
+  <code>tpu-inference</code> adding the forwarders that let a versioned adapter be loaded and the
+  previous one dropped in place, with the base weights and KV cache left warm.</li>
+</ul>
+
+<p>The MaxText and <code>tpu-inference</code> changes are both general rather than specific to
+this project, and I plan to upstream them.</p>
+
+<p>It should be useful to anyone training a model around 30B at a context around 20k on text-only
+problems: code generation, reasoning, research-style search.</p>
+
+<h2 id="machine">1. The machine</h2>
+
+<p>TPU Pod slices are available by number of <strong>TensorCores</strong>, which is neither
+the number of chips nor the number of physical machines.</p>
+
+<table class="d">
+  <thead><tr><th>Slice</th><th class="num">Chips</th><th class="num">Hosts</th><th class="num">Chips / host</th><th class="num">HBM / chip</th><th class="num">Total HBM</th></tr></thead>
+  <tbody>
+    <tr><td>v5p-8</td><td class="num">4</td><td class="num">1</td><td class="num">4</td><td class="num">95 GiB</td><td class="num">380 GiB</td></tr>
+    <tr><td>v5p-16</td><td class="num">8</td><td class="num">2</td><td class="num">4</td><td class="num">95 GiB</td><td class="num">760 GiB</td></tr>
+    <tr><td>v5p-32</td><td class="num">16</td><td class="num">4</td><td class="num">4</td><td class="num">95 GiB</td><td class="num">1,520 GiB</td></tr>
+  </tbody>
+</table>
+
+<p><strong>A host always has four chips</strong>, so
+a larger slice means more machines rather than denser ones. <strong>Each chip carries 95 GiB
+of high-bandwidth memory</strong> (HBM), which is roughly an H100's memory and still, as
+Section 10 shows, insufficient at long context. And <strong>each chip's two TensorCores
+appear to software as a single device</strong>: a v5p-16 ("16 cores") is 8 chips across
+2 hosts, and JAX reports 4 devices per host.</p>
+
+<figure>
+<svg viewBox="0 0 700 156" width="100%" role="img" aria-label="Diagram of a v5p-16 slice: two hosts of four chips each, one host training and one serving, with the adapter pushed between them.">
+  <rect x="4" y="26" width="296" height="122" rx="7" fill="#eef4fc" stroke="#c9ddf5"/>
+  <rect x="400" y="26" width="296" height="122" rx="7" fill="#fdf4ea" stroke="#f3ddc0"/>
+  <text x="16" y="18" font-family="Lato,sans-serif" font-size="12" fill="#4a4a4a">host 0 &mdash; trainer</text>
+  <text x="412" y="18" font-family="Lato,sans-serif" font-size="12" fill="#4a4a4a">host 1 &mdash; sampler (vLLM)</text>
+  <g font-family="Lato,sans-serif" font-size="11" fill="#ffffff" text-anchor="middle">
+    <rect x="20"  y="48" width="60" height="52" rx="4" fill="#1772d0"/><text x="50"  y="72">chip 0</text><text x="50"  y="87" font-size="9.5" fill="#d6e7fa">95 GiB</text>
+    <rect x="88"  y="48" width="60" height="52" rx="4" fill="#1772d0"/><text x="118" y="72">chip 1</text><text x="118" y="87" font-size="9.5" fill="#d6e7fa">95 GiB</text>
+    <rect x="156" y="48" width="60" height="52" rx="4" fill="#1772d0"/><text x="186" y="72">chip 2</text><text x="186" y="87" font-size="9.5" fill="#d6e7fa">95 GiB</text>
+    <rect x="224" y="48" width="60" height="52" rx="4" fill="#1772d0"/><text x="254" y="72">chip 3</text><text x="254" y="87" font-size="9.5" fill="#d6e7fa">95 GiB</text>
+    <rect x="416" y="48" width="60" height="52" rx="4" fill="#e08b2e"/><text x="446" y="72">chip 4</text><text x="446" y="87" font-size="9.5" fill="#fbe9d3">95 GiB</text>
+    <rect x="484" y="48" width="60" height="52" rx="4" fill="#e08b2e"/><text x="514" y="72">chip 5</text><text x="514" y="87" font-size="9.5" fill="#fbe9d3">95 GiB</text>
+    <rect x="552" y="48" width="60" height="52" rx="4" fill="#e08b2e"/><text x="582" y="72">chip 6</text><text x="582" y="87" font-size="9.5" fill="#fbe9d3">95 GiB</text>
+    <rect x="620" y="48" width="60" height="52" rx="4" fill="#e08b2e"/><text x="650" y="72">chip 7</text><text x="650" y="87" font-size="9.5" fill="#fbe9d3">95 GiB</text>
+  </g>
+  <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#9a9a9a"/></marker></defs>
+  <path d="M308 78 L392 78" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text x="350" y="70" font-family="Lato,sans-serif" font-size="10" fill="#7a7a7a" text-anchor="middle">adapter push</text>
+  <text x="152" y="122" font-family="Lato,sans-serif" font-size="11" fill="#4a4a4a" text-anchor="middle">weights sharded across 4 chips &middot; one sequence per chip</text>
+  <text x="548" y="122" font-family="Lato,sans-serif" font-size="11" fill="#4a4a4a" text-anchor="middle">full model replica &middot; serves the current adapter</text>
+</svg>
+<figcaption><b>The colocated layout.</b> One host trains, the others serve. On a v5p-16 that is a
+4/4 split; on a v5p-32 I give one host to the trainer and three to sampling, because
+generating tokens — not gradient math — is the slow half of an RL step.</figcaption>
+</figure>
+
+<h2 id="why">2. Why I needed a new backend</h2>
+
+<p>SkyRL ships a JAX training backend that implements the model forward pass, the
+optimizer, and the sampling loop directly. It is readable and self-contained, and it
+was the right starting point. But it is a <em>reimplementation</em>, and on TPUs a
+reimplementation competes with a great deal of work that Google has already done and
+tuned:</p>
+
+<ul>
+  <li><strong>MaxText</strong> — reference LLM implementations written for TPUs, with
+  the sharding annotations, attention kernels, and rematerialization policies already
+  chosen and benchmarked.</li>
+  <li><strong>tunix</strong> — a post-training library that wraps those models with
+  LoRA (via <code>qwix</code>), mesh construction, and checkpoint resharding.</li>
+  <li><strong>tokamax</strong> — a kernel library underneath, supplying the fused
+  attention primitives (MaxText can route its splash-attention scheduler through it).</li>
+</ul>
+
+<h3 id="kernels">The kernels I would have had to write</h3>
+<p>The concrete thing MaxText supplies is TPU kernels. Attention on a TPU is not a matrix
+multiply you write in JAX and hope the compiler handles; the fast implementations are
+hand-written in <a href="https://docs.jax.dev/en/latest/pallas/index.html">Pallas</a>,
+JAX's low-level kernel language, and they are what separates a working model from a fast one.</p>
+<table class="d">
+  <thead><tr><th>Kernel</th><th>Path</th><th>What it does</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Splash attention</strong></td><td>training</td>
+        <td>Block-sparse flash attention for TPU: never forms the T&times;T attention matrix, so
+        memory grows linearly in sequence length instead of quadratically. Indispensable at 20k tokens.</td>
+        <td class="good">active</td></tr>
+    <tr><td><strong>Ragged paged attention</strong></td><td>sampling</td>
+        <td>Serves a batch of different-length sequences out of a paged KV cache without padding
+        them to a common length &mdash; what makes continuous batching work.</td>
+        <td class="good">active</td></tr>
+    <tr><td><strong>Ragged attention</strong></td><td>training</td>
+        <td>The same idea on the trainer: skip padded regions of a batch rather than computing
+        and masking them.</td>
+        <td>available, off</td></tr>
+    <tr><td><strong>tokamax splash scheduler</strong></td><td>training</td>
+        <td>An alternative scheduler for the splash kernel, from Google's
+        <a href="https://github.com/google-deepmind/tokamax">tokamax</a> kernel library.</td>
+        <td>available, off</td></tr>
+  </tbody>
+</table>
+<p>Attention runs through a hand-written Pallas kernel on both halves of the stack, and neither
+is code I wrote: splash attention on the trainer through MaxText, ragged paged attention on the
+samplers through vLLM's TPU backend &mdash; where it is not a flag but the attention path itself.
+That pair is most of the reason this stack is built on MaxText and vLLM rather than on anything
+I would have had to write.</p>
+<p>The two inactive rows are training-side, and the ragged one is not a flag away. The backend
+does build a padding-aware mask, but the MaxText path discards it &mdash; MaxText applies causal
+masking internally, and <code>segment_ids</code> is accepted by the adapter and never forwarded.
+The kernel therefore sees a causal mask over the full length and has no way to know which
+positions are filler; padded positions are dropped from the loss afterwards, once the compute has
+already happened. Section&nbsp;10 explains what it would take to reclaim that.</p>
+<p class="src">Sampling kernel: <code>tpu_inference/kernels/ragged_paged_attention/v3/</code>,
+dispatched from <code>layers/common/attention_interface.py</code>.</p>
+
+<h3 id="mesh">The device mesh</h3>
+<p>The other thing I inherited is tunix's way of describing <em>where</em> a tensor lives. A
+<strong>device mesh</strong> is a named grid of chips: instead of writing "shard this matrix
+across four devices," you declare axes — <code>fsdp</code>, <code>tensor</code>,
+<code>data</code> — give the mesh a shape over the physical chips, and annotate each tensor
+with which of its dimensions map to which axis. The compiler derives every collective from
+those annotations.</p>
+<div class="fml">
+mesh = (fsdp=4, tensor=1) <span class="c">&nbsp;// 4 chips of one host, my configuration</span><br>
+weights &rarr; sharded on fsdp <span class="c">&nbsp; &nbsp;// 13.5 GB per chip</span><br>
+batch &nbsp; &rarr; sharded on fsdp <span class="c">&nbsp; &nbsp;// one sequence per chip</span>
+</div>
+<p>This is why Section 3's choice is a one-line change rather than a rewrite, and why the
+"rows must be a multiple of the chip count" rule exists at all: the batch dimension is mapped
+to a mesh axis of size four, so it has to divide by four. tunix also carries the idea further
+than I use it &mdash; a mesh per <em>role</em>, so a trainer and a sampler can occupy different
+chips with weights resharded between them, which is the principled version of the
+trainer/sampler split I built by hand.</p>
+
+<p>Writing my own forward pass would mean re-earning all of that by hand, per model
+family. So I kept SkyRL's <em>interface</em> — the Tinker API server, which speaks
+<code>forward_backward</code>, <code>optim_step</code>, and <code>sample</code> — and
+replaced the engine underneath it with one that drives MaxText models through tunix.
+The RL client never knows the difference.</p>
+<p class="src">Code: <code>skyrl/backends/tunix_backend.py</code> (~2,500 lines), plugged in via <code>--backend tunix</code>.</p>
+
+<h2 id="shard">3. How the model is split across chips</h2>
+
+<p>Three ways to spread a model over four chips, and the vocabulary matters because
+the choice determines the shape of every tensor downstream.</p>
+
+<table class="d">
+  <thead><tr><th>Strategy</th><th>Weights</th><th>Batch</th><th>Cost</th></tr></thead>
+  <tbody>
+    <tr><td><strong>DDP</strong> — distributed data parallel</td><td>full copy on every chip</td><td>split across chips</td><td>wastes memory; each chip stores all 54 GB</td></tr>
+    <tr><td><strong>FSDP</strong> — fully sharded data parallel</td><td>split across chips, gathered per layer</td><td>split across chips</td><td>a gather per layer; cheap inside a host</td></tr>
+    <tr><td><strong>TP</strong> — tensor parallel</td><td>every matrix split; chips cooperate on one sequence</td><td>not split</td><td>a collective inside every layer</td></tr>
+  </tbody>
+</table>
+
+<p>I use <strong>FSDP</strong>, and no tensor parallelism. Sharding the weights keeps
+40 GB per chip free for activations. Skipping TP avoids a communication step inside every
+layer, and TP earns its keep only when a model <em>cannot</em> fit otherwise — a 27B model
+at bf16 (54 GB) fits in 95 GiB with room to spare.</p>
+
+<div class="note">
+<b>FSDP is not TP plus DP.</b> Both shard weights at rest; they differ at compute time. FSDP
+gathers a layer's full weights, runs that layer on its own slice of the batch, and frees the
+copy — what crosses the wire is <em>weights</em>, and the math per chip is plain data
+parallelism. TP never gathers: every chip keeps a permanent slice, sees the <em>same</em>
+tokens, and computes a partial result — what crosses the wire is <em>activations</em>.
+</div>
+
+<div class="fml">
+weights per chip = 2 &times; P / C
+<span class="c">&nbsp; &nbsp; &nbsp;// P parameters, bf16 (2 bytes), C chips</span><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; = 2 &times; 27e9 / 4 = <b>13.5 GB</b>
+<span class="c">&nbsp; // measured: 13.5 GB on every chip</span>
+</div>
+
+<div class="note">
+<b>A consequence to keep in mind.</b> Under FSDP the <em>batch</em> is split across chips too, so the
+number of sequences in a training micro-batch must be a multiple of the chip count.
+On four chips, work arrives in units of four sequences. This single constraint returns
+in Section&nbsp;10 as the reason a memory ceiling could not simply be lowered.
+</div>
+
+<h2 id="backend">4. The Tunix backend</h2>
+
+<h3 id="whyapi">Why not write against Tunix directly?</h3>
+
+<p>Tunix is a library: the natural way to use it is to import it and build a trainer inside
+its abstractions, in JAX. I wanted an API boundary in between instead, for three reasons.</p>
+
+<p><strong>LoRA is enough for this.</strong> An RL update carries very little information.
+Supervised learning supplies information on the order of the number of tokens in an episode;
+a policy gradient supplies O(1) &mdash; an entire rollout collapsing to a single advantage
+number. <a href="https://thinkingmachines.ai/blog/lora/">Thinking Machines' analysis</a> makes
+that argument and finds LoRA matching full fine-tuning on policy-gradient RL at ranks as low as
+1, on two conditions: that the adapter is not capacity-constrained, and that it covers the MLP
+layers rather than attention alone. Every run here trains a rank-32 adapter over attention and
+MLP and never touches the base weights &mdash; far above what the signal can carry, and what
+makes a 27B model trainable on a single host at all.</p>
+
+<p><strong>The internals stay switchable.</strong> When the algorithm talks to an API rather
+than to a trainer, what sits underneath becomes configuration. I can develop and debug against
+my own TPU server and run the same code against the hosted Tinker service when a run needs to be
+larger than my slice &mdash; a different base URL, not a different program. Section&nbsp;9 is
+that property used as a test.</p>
+
+<p><strong>Many adapters over one base.</strong> The direction I want to explore next is
+multi-agent, and LoRA makes that cheap in the right way: a server holds many adapters against a
+single set of base weights (eight by default here), so several policies can be served and
+trained at once without several copies of a 27B model. Multiple bases would not fit; multiple
+adapters already do. That is an extension of the interface rather than a rewrite of it.</p>
+
+<p>All of it was reachable because SkyRL had already reimplemented the
+<a href="https://tinker-docs.thinkingmachines.ai/">Tinker API</a> &mdash; the HTTP server,
+the futures, the request batching and barrier scheduling, the weight-sync semantics. That is
+a narrow contract:</p>
+
+<table class="d">
+  <thead><tr><th>Verb</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><code>forward_backward(datums, loss_fn)</code></td><td>accumulate gradients</td></tr>
+    <tr><td><code>optim_step(adam_params)</code></td><td>apply them</td></tr>
+    <tr><td><code>sample(prompt, n, params)</code></td><td>generate</td></tr>
+    <tr><td><code>save_weights_and_get_sampling_client()</code></td><td>publish the policy to the samplers</td></tr>
+    <tr><td><code>save_weights</code> / <code>load_weights</code></td><td>checkpoint and resume</td></tr>
+  </tbody>
+</table>
+
+<p>Writing a <em>backend</em> beneath that contract, rather than a trainer beside Tunix,
+meant inheriting all of the above and staying compatible with every client already written
+against it. Tunix is still here &mdash; qwix LoRA, mesh construction, the MaxText plumbing all
+sit inside the backend. It moved from being the framework to being a dependency behind an
+interface.</p>
+
+<p>What the contract buys is visible in how little an algorithm has to say. This is a
+complete GRPO step:</p>
+
+<pre><code>sampling_client = await training_client.save_weights_and_get_sampling_client_async()
+
+results = await asyncio.gather(*[
+    sampling_client.sample_async(prompt=p, num_samples=group_size, sampling_params=sp)
+    for p in prompts
+])
+
+datums = []
+for result, prompt in zip(results, prompts):
+    rewards    = [grade(seq) for seq in result.sequences]
+    baseline   = sum(rewards) / len(rewards)
+    advantages = [r - baseline for r in rewards]      # &lt;- GRPO, in full
+    if all(a == 0.0 for a in advantages):
+        continue                                      # no signal in this group
+    for seq, adv in zip(result.sequences, advantages):
+        datums.append(tinker.Datum(
+            model_input   = prompt.append(EncodedTextChunk(tokens=seq.tokens[:-1])),
+            loss_fn_inputs = {"target_tokens": ..., "logprobs": seq.logprobs,
+                              "advantages": ...},
+        ))
+
+await training_client.forward_backward_async(datums, loss_fn="importance_sampling")
+await training_client.optim_step_async(adam_params)</code></pre>
+
+<p>Two lines are the algorithm. Nothing mentions a device, a mesh, a shard, or a compiler:
+<code>advantages</code> is a list of Python floats, and switching to PPO is
+<code>loss_fn="ppo"</code>. Everything this post is about &mdash; sharding, packing, tiled
+cross-entropy, compiled shapes &mdash; happens on the far side of
+<code>forward_backward</code>, where the client cannot see it and does not have to.</p>
+
+<p>That separation is what made the check in Section&nbsp;9 possible at all: an unmodified
+published recipe, pointed at a different URL.</p>
+
+<h3>What the backend has to do</h3>
+
+<p>The backend's job is to make MaxText models honor those verbs. A few decisions shaped it:</p>
+
+<ul>
+  <li><strong>Load MaxText directly through <code>pyconfig</code></strong>, bypassing
+  tunix's model-name registry, so any forked or unreleased model config can be loaded
+  by path. Converted checkpoints are cached (Section 6).</li>
+  <li><strong>Respect TPU shape rules.</strong> Sequence lengths round up to the
+  512-token attention block; batches pad to a multiple of the chip count. Both are
+  handled inside the backend so the client can send whatever it has.</li>
+  <li><strong>Train adapters, not the model.</strong> LoRA (rank 32) via
+  <code>qwix</code>, targeting attention and MLP projections. Only adapter gradients
+  exist, which is what makes a 27B model trainable on one host at all.</li>
+</ul>
+
+<h2 id="sampling">5. Sampling: vLLM, and inflight LoRA</h2>
+
+<p>An RL step spends most of its wall clock generating tokens, and generation is a
+different discipline from training — continuous batching, paged attention, careful
+KV-cache management. Rather than write that, I run <strong>vLLM</strong> on the
+sampling hosts.</p>
+
+<p>The subtlety is that in RL the policy changes every step, so the sampler must be
+updated constantly. Restarting a server per step would dominate the budget. Instead
+each <code>save_weights_for_sampler</code> exports a standard LoRA adapter directory
+and hot-swaps it into the running vLLM under a versioned name — load the new adapter,
+unload the previous, keep the base weights and KV cache warm. The sampler tracks the
+trainer within one step, and that is measurable: the divergence between the
+policy that generated a token and the policy being trained stayed between
+1&times;10<sup>-4</sup> and 5.3&times;10<sup>-4</sup> across a 180-step run.</p>
+
+<h3 id="vllmshard">How the sampler splits the model</h3>
+
+<p>The trainer uses FSDP. The sampler does not: vLLM runs <strong>tensor parallel across the
+four chips of its host</strong>, and the launcher derives that from the topology rather than
+being told:</p>
+
+<div class="fml">
+vLLM tensor parallel = chips per sampler host = <b>4</b><br>
+more than one sampler host &rarr; independent replicas, a full model each
+<span class="c">&nbsp; // v5p-16: one replica &nbsp;&middot;&nbsp; v5p-32: three</span>
+</div>
+
+<p>The trainer and the sampler make opposite choices on identical hardware, and for the
+sampler the reason is the KV cache. Tensor parallelism splits the weights, and what that buys
+is room:</p>
+
+<div class="fml">
+weights per chip = 2 &times; P / 4 = <b>13.5 GB</b>
+<span class="c">&nbsp; &nbsp;// the same arithmetic as the trainer</span><br>
+KV cache &nbsp; &nbsp; &nbsp; &nbsp;= the ~88 GB per chip left over, pooled across the four
+</div>
+
+<p>A full replica on a single chip would spend 54 of its 102 GB on weights before one sequence
+arrived. Splitting them four ways leaves nearly the whole host for cached attention state, which
+is the constraint that actually binds when a step is dozens of concurrent 20k-token rollouts.
+Decode is bandwidth-bound rather than arithmetic-bound, so the same split also means each chip
+reads a quarter of the weights per token; the activations exchanged per layer are one token wide.</p>
+
+<p>That is the shape of the sampler numbers in Section&nbsp;7: about 97 GB of HBM reserved
+against 1.7% of the TensorCores busy — memory reserved and bytes moved, not arithmetic
+performed.</p>
+
+<p class="src">Adapter path: <code>tpu/vllm_tpu_server.py</code> and a fork of <code>tpu-inference</code>
+pinned at <code>skyrl/v0.23.0-lora</code>, so the runtime-LoRA hooks are source-installed rather
+than patched at deploy time.</p>
+
+<h2 id="cache">6. Caching, because the machine will be taken away</h2>
+
+<p>I run on <em>preemptible</em> (spot) slices: cheap, and reclaimed without warning.
+In practice mine lasted between one hour and two days. Any run longer than that has to
+survive losing its machine, which turns each expensive artifact into the same question:
+if this slice disappears, what should not have to be computed again?</p>
+
+<table class="d">
+  <thead><tr><th>Cached artifact</th><th>Cost if lost</th><th>Where it lives</th></tr></thead>
+  <tbody>
+    <tr><td>HuggingFace weights (54 GB)</td><td>~35 min download</td><td>GCS mirror &rarr; local SSD</td></tr>
+    <tr><td>MaxText/orbax converted checkpoint</td><td>~20 min conversion</td><td>GCS, keyed by model</td></tr>
+    <tr><td>vLLM XLA compilation cache</td><td><strong>~60 min</strong> cold compile</td><td>GCS, keyed by shape config</td></tr>
+    <tr><td>LoRA adapter + optimizer state</td><td>all training progress</td><td>GCS, every N steps</td></tr>
+    <tr><td>Graded rollouts for the current step</td><td>~40&ndash;70 min of sampling</td><td>local, mirrored to GCS</td></tr>
+  </tbody>
+</table>
+
+<p>The last row is the one people forget. An RL step is <em>sample, then train</em>, and
+sampling is the long half. Preemption during the training half would otherwise throw
+away an hour of finished generation. Caching the graded rollouts mid-step means a
+replacement machine reloads them and goes straight to the gradient. With all five
+caches warm, a fresh slice goes from nothing to training in about 25 minutes, and the
+run resumes at the step it lost rather than the step it last checkpointed.</p>
+
+<h2 id="loop">7. The training loop: synchronous, then pipelined</h2>
+
+<p>The first working version was the obvious one. Sample the whole batch, wait, train
+on it, wait, repeat. It worked, and it wasted half the machine: while the sampling
+hosts generate, the training host idles, and vice versa.</p>
+
+<figure>
+<svg viewBox="0 0 700 176" width="100%" role="img" aria-label="Timeline comparing synchronous and pipelined RL steps.">
+  <text x="0" y="14" font-family="Lato,sans-serif" font-size="12" fill="#4a4a4a">synchronous &mdash; 330 s / step</text>
+  <rect x="0"   y="24" width="250" height="26" rx="3" fill="#e08b2e"/><text x="125" y="41" font-size="11" fill="#fff" font-family="Lato,sans-serif" text-anchor="middle">sample (all 1024 rollouts)</text>
+  <rect x="252" y="24" width="230" height="26" rx="3" fill="#1772d0"/><text x="367" y="41" font-size="11" fill="#fff" font-family="Lato,sans-serif" text-anchor="middle">train</text>
+  <rect x="484" y="24" width="80"  height="26" rx="3" fill="#9a9a9a"/><text x="524" y="41" font-size="10.5" fill="#fff" font-family="Lato,sans-serif" text-anchor="middle">sync</text>
+  <text x="0" y="86" font-family="Lato,sans-serif" font-size="12" fill="#4a4a4a">pipelined &mdash; 210 s / step</text>
+  <rect x="0"   y="96"  width="200" height="26" rx="3" fill="#e08b2e"/><text x="100" y="113" font-size="11" fill="#fff" font-family="Lato,sans-serif" text-anchor="middle">sample (streamed)</text>
+  <rect x="40"  y="126" width="235" height="26" rx="3" fill="#1772d0"/><text x="157" y="143" font-size="11" fill="#fff" font-family="Lato,sans-serif" text-anchor="middle">train (minibatch waves)</text>
+  <rect x="277" y="126" width="60"  height="26" rx="3" fill="#9a9a9a"/><text x="307" y="143" font-size="10.5" fill="#fff" font-family="Lato,sans-serif" text-anchor="middle">sync</text>
+  <line x1="40" y1="92" x2="40" y2="158" stroke="#b0b0b0" stroke-dasharray="3 3"/>
+  <text x="46" y="170" font-family="Lato,sans-serif" font-size="10.5" fill="#7a7a7a">first minibatch ready &rarr; training starts while sampling continues</text>
+</svg>
+<figcaption><b>Overlap, not approximation.</b> The pipelined loop is mathematically identical to the
+synchronous one: every rollout in a step comes from the same policy version, gradients accumulate
+across streamed calls, and exactly one optimizer step fires per batch.</figcaption>
+</figure>
+
+<p>The pipelined version streams finished minibatches to the trainer as they are graded.
+Training begins as soon as the first wave lands, and the sampling of later waves hides
+inside the gradient math of earlier ones. Measured on a v5p-16 with Qwen3-8B, 1024
+rollouts per step:</p>
+
+<table class="d">
+  <thead><tr><th>Configuration</th><th class="num">s / step</th><th class="num">Speedup</th></tr></thead>
+  <tbody>
+    <tr><td>Synchronous loop, micro-batch 8</td><td class="num">330</td><td class="num">&mdash;</td></tr>
+    <tr><td>Micro-batch 32, adapters published directly (no archive round-trip)</td><td class="num">290</td><td class="num">1.14&times;</td></tr>
+    <tr><td><strong>Pipelined: streamed minibatches, concurrent sampling</strong></td><td class="num"><strong>210</strong></td><td class="num"><strong>1.57&times;</strong></td></tr>
+  </tbody>
+</table>
+
+<p>Inside a 210-second step: gradient waves take ~130 s and pace everything (sampling's
+~95 s hides entirely inside that window), adapter export and load take ~45 s of pure
+I/O, and the optimizer step itself takes 0.1 s. The proportions are what matter: the
+gradient update is essentially free, and nearly all of a step is spent moving data and
+waiting on generation.</p>
+
+<h3 id="util">Utilization: nothing here is compute-bound</h3>
+<p>A sidecar samples each chip's counters during training and logs them alongside the run.
+The numbers say where the remaining performance is.</p>
+
+<figure>
+<svg viewBox="0 0 700 210" width="100%" role="img" aria-label="TensorCore, memory bandwidth and HBM utilization for the trainer and sampler hosts.">
+  <g font-family="Lato,sans-serif" font-size="11.5" fill="#4a4a4a">
+    <text x="0" y="14">trainer host &mdash; gradient waves</text><text x="340" y="14">sampler host &mdash; vLLM decode</text>
+  </g>
+  <g font-family="Lato,sans-serif" font-size="10.5" fill="#7a7a7a">
+    <text x="0" y="42">TensorCore</text><text x="0" y="82">memory b/w</text><text x="0" y="122">HBM used</text><text x="0" y="162">duty cycle</text>
+    <text x="340" y="42">TensorCore</text><text x="340" y="82">memory b/w</text><text x="340" y="122">HBM used</text><text x="340" y="162">duty cycle</text>
+  </g>
+  <!-- track + fill, 150px = 100% ; trainer at x=90, sampler at x=430 -->
+  <g>
+    <rect x="90" y="31" width="150" height="14" rx="3" fill="#f0f0f0"/><rect x="90" y="31" width="32" height="14" rx="3" fill="#1772d0"/>
+    <rect x="90" y="71" width="150" height="14" rx="3" fill="#f0f0f0"/><rect x="90" y="71" width="20" height="14" rx="3" fill="#1772d0"/>
+    <rect x="90" y="111" width="150" height="14" rx="3" fill="#f0f0f0"/><rect x="90" y="111" width="95" height="14" rx="3" fill="#5598e7"/>
+    <rect x="90" y="151" width="150" height="14" rx="3" fill="#f0f0f0"/><rect x="90" y="151" width="95" height="14" rx="3" fill="#9ec5f4"/>
+    <rect x="430" y="31" width="150" height="14" rx="3" fill="#f0f0f0"/><rect x="430" y="31" width="3"   height="14" rx="2" fill="#e08b2e"/>
+    <rect x="430" y="71" width="150" height="14" rx="3" fill="#f0f0f0"/><rect x="430" y="71" width="8"   height="14" rx="3" fill="#e08b2e"/>
+    <rect x="430" y="111" width="150" height="14" rx="3" fill="#f0f0f0"/><rect x="430" y="111" width="152" height="14" rx="3" fill="#b3261e"/>
+    <rect x="430" y="151" width="150" height="14" rx="3" fill="#f0f0f0"/><rect x="430" y="151" width="125" height="14" rx="3" fill="#f0b978"/>
+  </g>
+  <g font-family="Lato,sans-serif" font-size="10" fill="#4a4a4a">
+    <text x="248" y="42">15&ndash;21%</text><text x="248" y="82">13%</text><text x="248" y="122">63% &middot; 61 GB</text><text x="248" y="162">52&ndash;75%</text>
+    <text x="590" y="42">1.7%</text><text x="590" y="82">5.5%</text><text x="590" y="122" fill="#b3261e">101% &middot; KV prealloc</text><text x="590" y="162">83%</text>
+  </g>
+  <text x="0" y="196" font-family="Lato,sans-serif" font-size="10.5" fill="#7a7a7a">Percent of each chip's peak. Sampling reserves nearly all of its HBM up front for the KV cache.</text>
+</svg>
+<figcaption><b>Where the machine actually is.</b> The trainer uses about a fifth of its arithmetic
+capability and an eighth of its memory bandwidth; the sampler uses almost no arithmetic at all
+and nearly all of its memory. Neither host is limited by floating-point throughput.</figcaption>
+</figure>
+
+<p>Two different bottlenecks. Decode is <em>memory-bound</em> by nature — generating one token
+reads the whole model and does almost no arithmetic with it — so 1.7% TensorCore is close to
+expected, and vLLM's job is to keep enough sequences in flight to hide it. The trainer's 15&ndash;21%
+is the more interesting figure: it is not FLOP-limited but pipeline-limited, waiting on requests,
+results, and adapter I/O. That is what the pipelined loop attacks, and why the next unclaimed
+gains are also structural — one-step-off-policy sampling, and an in-place adapter reload to cut
+the 45-second sync.</p>
+
+<h3>Parameters that actually matter</h3>
+<table class="d">
+  <thead><tr><th>Knob</th><th>What it trades</th></tr></thead>
+  <tbody>
+    <tr><td><code>GROUP_SIZE</code> &times; <code>GROUPS_PER_BATCH</code></td><td>rollouts per step: gradient quality vs. step time (I use 8&times;32 and 16&times;32)</td></tr>
+    <tr><td><code>STREAM_NUM_MINIBATCHES</code></td><td>how finely sampling is streamed to the trainer; more overlap vs. more per-call overhead</td></tr>
+    <tr><td><code>TRAIN_MICRO_BATCH_SIZE</code></td><td>sequences per gradient call; the single biggest memory lever</td></tr>
+    <tr><td><code>LORA_RANK</code></td><td>adapter capacity (32 throughout) — also sets gradient and optimizer size</td></tr>
+    <tr><td><code>MAX_TOKENS</code> / context window</td><td>the subject of Section 10</td></tr>
+  </tbody>
+</table>
+
+<h2 id="models">8. Making Qwen3.5 exist in MaxText</h2>
+
+<p>I wanted two strong open models: <strong>Gemma-4-31B</strong> and
+<strong>Qwen3.5-27B</strong>. Gemma was straightforward — MaxText already ships a
+reference implementation, so it was a matter of adapter plumbing. Qwen3.5 was not
+implemented at all, and its architecture is unusual enough to be interesting: a
+<em>hybrid</em> stack where three of every four layers use linear attention (a gated
+DeltaNet) and every fourth uses full attention, with a 248,320-token vocabulary.</p>
+
+<p>I added it in a <a href="https://github.com/SachinKonan/maxtext">MaxText fork</a>:
+the dense-MLP branch in the decoder, a model config, and a HuggingFace&rarr;orbax
+converter mapping. Most of the effort then went to a subtler problem — proving
+the port was <em>numerically correct</em>. If the trainer's model disagrees with the
+sampler's, RL still runs; it just quietly optimizes the wrong objective.</p>
+
+<p>A three-way log-probability comparison (the MaxText port, the HuggingFace reference,
+and the vLLM sampler), together with a per-layer bisection, found three bugs. They failed
+in different ways, which is why all three are listed here.</p>
+
+<table class="d">
+  <thead><tr><th>#</th><th>Bug</th><th>Why it was needed</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Final norm used plain RMSNorm; Qwen3.5 uses the zero-centered form <code>(1+w)&middot;x&#770;</code></td>
+        <td><strong>The expensive one.</strong> A flat ~2 nats/token divergence that per-layer comparison
+        <em>cannot</em> see — the reference exposes hidden states <em>before</em> the final norm, so every
+        layer matches and only the output is wrong.</td></tr>
+    <tr><td>2</td><td>Multimodal RoPE must be disabled for text-only inputs</td>
+        <td>MaxText's mRoPE rotates the full head dimension, ignoring the partial-rotary factor
+        this model expects. Silently wrong positions, not a crash.</td></tr>
+    <tr><td>3</td><td>The LoRA tracing batch must divide the FSDP mesh</td>
+        <td>The gated-DeltaNet layers shard their batch internally; a trace batch that does not
+        divide evenly fails at adapter-injection time. A shape rule, not a math bug.</td></tr>
+  </tbody>
+</table>
+
+<p>The payoff is measurable: at step 0 the sampler and trainer disagreed by
+<strong>1.7&times;10<sup>-4</sup> nats</strong> — the cleanest parity of any model I
+brought up, and the evidence that the port was right before a single gradient was taken.</p>
+
+<div class="note">
+<b>Status note.</b> Gemma-4-31B is fully plumbed — renderer, LoRA arms, adapter export, run
+config — but its math-RL validation run is still outstanding. The numbers below are Qwen.
+</div>
+
+<h2 id="results">9. Does it learn?</h2>
+
+<p>I validated on mathematical reasoning with verifiable rewards: the model answers
+competition-style problems, correct answers are rewarded, and accuracy is tracked on a
+held-out set.</p>
+
+<p>First <strong>Qwen3-8B</strong> from a cold start, 180 steps on a v5p-16 — held-out
+accuracy went <strong>1.2% &rarr; 77.4%</strong>. That run also survived a preemption at
+step 60 and resumed on a fresh machine with optimizer state intact, which was the real
+test of Section 6.</p>
+
+<p>Then two 30B-class models on the same recipe and the same hardware —
+<strong>Qwen3.5-27B</strong> and <strong>gemma4-31B</strong>, each 256 rollouts per step,
+rank-32 LoRA, 2e-5, 512 tokens, 180 steps:</p>
+
+<table class="d">
+  <thead><tr><th>Held-out accuracy</th><th class="num">step 0</th><th class="num">20</th><th class="num">40</th><th class="num">60</th><th class="num">80</th><th class="num">100</th><th class="num">120</th><th class="num">140</th><th class="num">160</th><th class="num">179</th></tr></thead>
+  <tbody>
+    <tr><td>Qwen3.5-27B</td><td class="num">37.2%</td><td class="num">73.4%</td><td class="num">84.8%</td><td class="num">85.6%</td><td class="num">86.4%</td><td class="num">83.2%</td><td class="num">86.0%</td><td class="num"><span class="good">87.0%</span></td><td class="num">86.2%</td><td class="num">86.4%</td></tr>
+    <tr><td>gemma4-31B</td><td class="num">62.4%</td><td class="num">65.6%</td><td class="num">68.6%</td><td class="num">71.8%</td><td class="num">72.8%</td><td class="num">77.0%</td><td class="num">77.2%</td><td class="num">78.4%</td><td class="num"><span class="good">81.0%</span></td><td class="num">80.4%</td></tr>
+  </tbody>
+</table>
+
+<figure>
+<svg viewBox="0 0 700 220" width="100%" role="img" aria-label="Held-out accuracy over 180 training steps for Qwen3.5-27B, gemma4-31B and Qwen3-8B.">
+  <g font-family="Lato,sans-serif" font-size="11">
+    <line x1="52" y1="9" x2="70" y2="9" stroke="#1772d0" stroke-width="2.4"/><text x="76" y="13" fill="#4a4a4a">Qwen3.5-27B</text>
+    <line x1="145" y1="9" x2="163" y2="9" stroke="#127a3d" stroke-width="2.4"/><text x="169" y="13" fill="#4a4a4a">gemma4-31B</text>
+    <line x1="233" y1="9" x2="251" y2="9" stroke="#e08b2e" stroke-width="2.4" stroke-dasharray="5 3"/><text x="257" y="13" fill="#4a4a4a">Qwen3-8B</text>
+  </g>
+  <line x1="52" y1="186" x2="676" y2="186" stroke="#d0d0d0"/>
+  <line x1="52" y1="36" x2="52" y2="186" stroke="#d0d0d0"/>
+  <line x1="52" y1="148" x2="676" y2="148" stroke="#f0f0f0"/><line x1="52" y1="111" x2="676" y2="111" stroke="#f0f0f0"/><line x1="52" y1="73" x2="676" y2="73" stroke="#f0f0f0"/>
+  <g font-family="Lato,sans-serif" font-size="10.5" fill="#8a8a8a">
+    <text x="46" y="190" text-anchor="end">0%</text><text x="46" y="152" text-anchor="end">25%</text>
+    <text x="46" y="115" text-anchor="end">50%</text><text x="46" y="77" text-anchor="end">75%</text><text x="46" y="40" text-anchor="end">100%</text>
+    <text x="52" y="202">0</text><text x="225" y="202">50</text><text x="398" y="202">100</text><text x="571" y="202">150</text>
+    <text x="364" y="216" text-anchor="middle" fill="#7a7a7a">training step</text>
+  </g>
+  <polyline fill="none" stroke="#e08b2e" stroke-width="2.2" stroke-dasharray="5 3"
+    points="52,184 121,179 190,150 259,104 328,85 398,69 467,67 536,65 605,64 671,65"/>
+  <polyline fill="none" stroke="#127a3d" stroke-width="2.2"
+    points="52,92 121,88 190,83 259,78 328,77 398,70 467,70 536,68 605,64 671,65"/>
+  <polyline fill="none" stroke="#1772d0" stroke-width="2.2"
+    points="52,130 121,76 190,59 259,58 328,56 398,61 467,57 536,55 605,57 671,56"/>
+  <circle cx="536" cy="55" r="3.6" fill="#1772d0"/>
+  <text x="536" y="47" font-family="Lato,sans-serif" font-size="10.5" fill="#1772d0" text-anchor="middle">87.0%</text>
+  <circle cx="605" cy="64" r="3.6" fill="#127a3d"/>
+  <text x="605" y="80" font-family="Lato,sans-serif" font-size="10.5" fill="#127a3d" text-anchor="middle">81.0%</text>
+</svg>
+<figcaption>Held-out accuracy over 180 steps. Qwen3.5-27B peaks at 87.0% (step 140);
+gemma4-31B starts from a far stronger base and climbs almost monotonically to 81.0% (step 160),
+improving at every eval but the last.</figcaption>
+</figure>
+
+<p>gemma4-31B is also the best evidence for Section&nbsp;6. That run survived
+<strong>four spot preemptions</strong> — each time the supervisor recreated the machine and
+resumed from the last checkpoint in GCS, with the step count continuous across all of them —
+for 7.1 hours of training wall clock at a mean of 142 s per step.</p>
+
+<p>Two things are worth recording against it. Its adapters ship through vLLM's native LoRA path
+under composite names (<code>model.language_model.layers.N</code>), and MaxText's six-layer
+grouped scan de-interleaves as <code>hf_layer = stack_idx &times; 6 + k</code>; because the global
+layers carry no <code>v_proj</code>, a correct adapter is 820 tensors rather than 840. Get the
+names or the mapping wrong and it loads successfully and does nothing. And its sampler-trainer
+KL drifted from 0.026 early to about 1.0 by the end (mean 0.39) without denting the eval curve —
+benign over 180 steps, but the Qwen run held inside [1&times;10<sup>-4</sup>, 5.3&times;10<sup>-4</sup>],
+and that is the behaviour I would want on anything longer.</p>
+
+<h3 id="refcheck">Against a published reference</h3>
+
+<p>The client in all of this is not my code. It is the
+<a href="https://tinker-docs.thinkingmachines.ai/cookbook/recipes/math-rl/">Tinker Cookbook</a>
+math-RL recipe run unmodified &mdash; the same module, the same defaults &mdash; with two
+arguments changed: <code>model_name</code>, and a <code>base_url</code> pointing at my server
+instead of the hosted API. The training code never learns it is talking to my TPUs.</p>
+
+<p>Thinking Machines publishes a result for that recipe, which gives an outside number to
+check against:</p>
+
+<pre><code>python -m tinker_cookbook.recipes.math_rl.train env=math \
+  model_name="Qwen/Qwen3.5-9B" group_size=16 groups_per_batch=64 \
+  learning_rate=2e-5 max_tokens=512
+
+# after 180 steps:  "test/env/all/correct": 0.838</code></pre>
+
+<table class="d">
+  <thead><tr><th>Run</th><th>Model</th><th class="num">rollouts/step</th><th class="num">steps</th><th class="num">held-out</th></tr></thead>
+  <tbody>
+    <tr><td>Cookbook (hosted Tinker)</td><td>Qwen3.5-9B</td><td class="num">16 &times; 64 = 1024</td><td class="num">180</td><td class="num">83.8%</td></tr>
+    <tr><td>this stack, v5p-16</td><td>Qwen3-8B</td><td class="num">16 &times; 64 = 1024</td><td class="num">180</td><td class="num">77.4%</td></tr>
+    <tr><td>this stack, v5p-16</td><td>Qwen3.5-27B</td><td class="num">8 &times; 32 = 256</td><td class="num">180</td><td class="num"><span class="good">86.4%</span> (peak 87.0%)</td></tr>
+    <tr><td>this stack, v5p-16</td><td>gemma4-31B</td><td class="num">8 &times; 32 = 256</td><td class="num">180</td><td class="num">80.4% (peak 81.0%)</td></tr>
+  </tbody>
+</table>
+
+<p>Learning rate (2e-5), token budget (512), LoRA rank (32), loss function and step count are
+identical across all four rows. The rest is not controlled, and I would not read it as a
+head-to-head: the Qwen3-8B row is a different model generation, and the two 30B rows train on a
+quarter of the batch &mdash; two differences that push in opposite directions.
+What the table does establish is that the same recipe pointed at my backend lands in the same
+band as the published number rather than somewhere anomalous.</p>
+
+<h2 id="long">10. The 22,528-token wall</h2>
+
+<p>Everything above happens at a 512-token generation budget. That is enough for math
+answers and nowhere near enough for the actual target: a model that
+<em>reasons at length</em> — thinking for thousands of tokens before writing a program
+that gets executed and scored.</p>
+
+<p>Raising the context from 512 to 22,528 tokens broke the system in five distinct ways.
+This is the part worth reading, because the failures were not "out of memory, use less" —
+they were structural, and each fix is a small piece of engineering with a clean idea in it.</p>
+
+<h3 id="memgoes">Where the memory actually goes</h3>
+
+<p>Start with the arithmetic. A training step must, for every token, compare the model's
+predicted distribution against the token that was actually sampled. The naive way
+materializes the full distribution:</p>
+
+<div class="fml">
+logits = B &times; T &times; V &times; bytes <span class="c">&nbsp;// B sequences, T tokens, V vocabulary</span><br><br>
+at 512 tokens: &nbsp;4 &times; 512 &nbsp; &times; 248,320 &times; 4 = <b>2.0 GB</b> &nbsp; <span class="c">// comfortable</span><br>
+at 20,480: &nbsp; &nbsp; &nbsp;4 &times; 20,480 &times; 248,320 &times; 4 = <b>81.4 GB</b> &nbsp;<span class="c">// on a 95 GiB chip that already holds 13.5 GB of weights</span>
+</div>
+
+<p>Qwen3.5's vocabulary of 248,320 is what makes this severe. The logits tensor grows
+linearly in context length and is multiplied by a quarter of a million — at 20k tokens it alone exceeds
+what the chip has left, before counting the activations of 64 transformer layers or the
+copy that computing a log-softmax would produce.</p>
+
+<figure>
+<svg viewBox="0 0 700 218" width="100%" role="img" aria-label="Stacked memory budget per chip at 512 tokens versus 20,480 tokens, before and after fixes.">
+  <line x1="290" y1="18" x2="290" y2="196" stroke="#b3261e" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <text x="296" y="15" font-family="Lato,sans-serif" font-size="10.5" fill="#b3261e">95 GiB &mdash; the chip</text>
+  <g font-family="Lato,sans-serif" font-size="11.5" fill="#4a4a4a">
+    <text x="0" y="42">512 tok</text><text x="0" y="98">20k naive</text><text x="0" y="154">20k fixed</text>
+  </g>
+  <g font-family="Lato,sans-serif" font-size="10" fill="#ffffff" text-anchor="middle">
+    <!-- scale: 95 GiB = 102 GB -> 220px  =>  2.157 px/GB -->
+    <rect x="70" y="28" width="29" height="24" fill="#1772d0"/><text x="84" y="45">w</text>
+    <rect x="100" y="28" width="5" height="24" fill="#5598e7"/>
+    <text x="115" y="45" fill="#7a7a7a" text-anchor="start" font-size="10.5">13.5 GB weights + 2 GB logits &mdash; fits easily</text>
+
+    <rect x="70"  y="84" width="29"  height="24" fill="#1772d0"/><text x="84" y="101">w</text>
+    <rect x="100" y="84" width="176" height="24" fill="#b3261e"/><text x="188" y="101">81.4 GB logits</text>
+    <rect x="277" y="84" width="62"  height="24" fill="#d98680"/>
+    <text x="346" y="101" fill="#b3261e" text-anchor="start" font-size="10.5">&hellip; plus its log-softmax copy</text>
+
+    <rect x="70"  y="140" width="29" height="24" fill="#1772d0"/><text x="84" y="157">w</text>
+    <rect x="100" y="140" width="5"  height="24" fill="#127a3d"/>
+    <rect x="106" y="140" width="62" height="24" fill="#5598e7"/><text x="137" y="157">activations</text>
+    <text x="180" y="157" fill="#127a3d" text-anchor="start" font-size="10.5">2.0 GB logits per tile &mdash; fits, with room</text>
+  </g>
+  <text x="0" y="182" font-family="Lato,sans-serif" font-size="11" fill="#7a7a7a">w = 13.5 GB sharded weights</text>
+  <text x="0" y="206" font-family="Lato,sans-serif" font-size="11" fill="#7a7a7a">Fixed = fused linear cross-entropy: only one tile of the vocabulary exists at a time.</text>
+</svg>
+<figcaption><b>The 20k cliff.</b> At 512 tokens the budget is trivially satisfied. At 20k the logits
+alone overrun the chip. The fix is to avoid constructing the tensor at all, rather than to
+reduce the batch.</figcaption>
+</figure>
+
+<h3 id="f1">1 · Score log-probabilities on the training chips</h3>
+<p>RL needs the log-probability of tokens that were <em>already generated</em>. The natural
+place to get them is the inference server — but vLLM's TPU backend crashes when asked to
+return them for long prompts. So I moved that computation onto the training host, where the
+model already lives, jitted it, and gathered only the target token's value inside the compiled
+program rather than returning a full distribution. The scoring path also has to pad its batch
+to the chip count, exactly like training.</p>
+
+<h3 id="f2">2 · Pack micro-batches by token budget, not sequence count</h3>
+<p>"Eight sequences per batch" is meaningless when sequences range from 1,000 to 20,000 tokens.
+I pack by total tokens instead:</p>
+<div class="fml">
+rows &times; T &le; budget<span class="c">&nbsp; &nbsp;// and rows must be a multiple of C, the chip count</span>
+</div>
+<p>Memory then depends on a quantity I control, rather than on whatever lengths the model
+happened to produce.</p>
+
+<figure>
+<svg viewBox="0 0 700 250" width="100%" role="img" aria-label="Diagram: variable-length sequences packed into fixed tiles of four rows, with padding shown.">
+  <defs><pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+    <rect width="6" height="6" fill="#f4f4f4"/><line x1="0" y1="0" x2="0" y2="6" stroke="#d5d5d5" stroke-width="2.2"/></pattern></defs>
+  <g font-family="Lato,sans-serif" font-size="11.5" fill="#4a4a4a">
+    <text x="0" y="22">as sampled &mdash; variable length</text>
+    <text x="380" y="22">packed into tiles &mdash; one fixed shape</text>
+  </g>
+  <g font-family="Lato,sans-serif" font-size="9.5" fill="#8a8a8a" text-anchor="end">
+    <text x="40" y="49">14.1k</text><text x="40" y="66">11.8k</text><text x="40" y="83">10.8k</text><text x="40" y="100">9.4k</text>
+    <text x="40" y="117">8.1k</text><text x="40" y="134">7.1k</text><text x="40" y="151">5.2k</text><text x="40" y="168">3.9k</text>
+  </g>
+  <g fill="#1772d0">
+    <rect x="46" y="39" width="103" height="13" rx="2"/><rect x="46" y="56" width="87" height="13" rx="2"/>
+    <rect x="46" y="73" width="79"  height="13" rx="2"/><rect x="46" y="90" width="69" height="13" rx="2"/>
+    <rect x="46" y="107" width="59" height="13" rx="2"/><rect x="46" y="124" width="52" height="13" rx="2"/>
+    <rect x="46" y="141" width="38" height="13" rx="2"/><rect x="46" y="158" width="29" height="13" rx="2"/>
+  </g>
+  <path d="M300 104 L352 104" stroke="#9a9a9a" stroke-width="1.5" marker-end="url(#ar2)"/>
+  <defs><marker id="ar2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#9a9a9a"/></marker></defs>
+  <text x="326" y="98" font-family="Lato,sans-serif" font-size="9.5" fill="#8a8a8a" text-anchor="middle">sort, group</text>
+
+  <!-- tile 1 -->
+  <rect x="380" y="34" width="150" height="72" fill="url(#hatch)" stroke="#c9c9c9"/>
+  <g fill="#1772d0">
+    <rect x="380" y="39" width="103" height="13"/><rect x="380" y="56" width="87" height="13"/>
+    <rect x="380" y="73" width="79"  height="13"/><rect x="380" y="90" width="69" height="13"/>
+  </g>
+  <text x="540" y="58" font-family="Lato,sans-serif" font-size="10.5" fill="#4a4a4a">tile 1 &mdash; 4 rows</text>
+  <text x="540" y="73" font-family="Lato,sans-serif" font-size="9.5" fill="#8a8a8a">one row per chip</text>
+  <!-- tile 2 -->
+  <rect x="380" y="124" width="150" height="72" fill="url(#hatch)" stroke="#c9c9c9"/>
+  <g fill="#1772d0">
+    <rect x="380" y="129" width="59" height="13"/><rect x="380" y="146" width="52" height="13"/>
+    <rect x="380" y="163" width="38" height="13"/><rect x="380" y="180" width="29" height="13"/>
+  </g>
+  <text x="540" y="148" font-family="Lato,sans-serif" font-size="10.5" fill="#4a4a4a">tile 2 &mdash; 4 rows</text>
+  <text x="540" y="163" font-family="Lato,sans-serif" font-size="9.5" fill="#8a8a8a">same shape as tile 1</text>
+
+  <line x1="380" y1="208" x2="530" y2="208" stroke="#8a8a8a" stroke-width="1"/>
+  <line x1="380" y1="204" x2="380" y2="212" stroke="#8a8a8a"/><line x1="530" y1="204" x2="530" y2="212" stroke="#8a8a8a"/>
+  <text x="455" y="223" font-family="Lato,sans-serif" font-size="10" fill="#4a4a4a" text-anchor="middle">T = 20,480 &mdash; every row padded to this</text>
+  <rect x="0" y="196" width="13" height="11" fill="#1772d0"/><text x="18" y="205" font-family="Lato,sans-serif" font-size="10.5" fill="#7a7a7a">real tokens</text>
+  <rect x="0" y="214" width="13" height="11" fill="url(#hatch)" stroke="#c9c9c9"/><text x="18" y="223" font-family="Lato,sans-serif" font-size="10.5" fill="#7a7a7a">padding &mdash; computed, then discarded</text>
+  <text x="0" y="243" font-family="Lato,sans-serif" font-size="10.5" fill="#7a7a7a">peak memory is the whole rectangle: rows &times; T, not the blue area</text>
+</svg>
+<figcaption><b>Shaping.</b> Sequences are sorted, grouped four at a time (one per chip), and every row
+is padded to a single fixed length. The compiler sees one tensor shape for the entire run, and peak
+memory is the full rectangle &mdash; which is why the row count and <i>T</i> are the two numbers that matter.</figcaption>
+</figure>
+
+<h3 id="f3">3 · Never materialize a log-softmax</h3>
+<p>The standard way to get a token's log-probability is <code>log_softmax(logits)[target]</code>,
+which allocates a second tensor the size of the first. The identity</p>
+<div class="fml">
+log_softmax(x)[i] = log( exp(x[i]) / &Sigma; exp(x[j]) ) <span class="c">&nbsp;// definition</span><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;= x[i] &minus; log &Sigma; exp(x[j]) <span class="c">&nbsp; &nbsp; &nbsp;// log of a quotient</span><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;= <b>x[i] &minus; logsumexp(x)</b>
+</div>
+<p>saves the entire tensor. The two sides are equal by definition, but they cost different
+amounts: the left-hand side produces a <em>vector</em> with one entry per vocabulary token —
+248,320 numbers, of which exactly one is ever read — while the right-hand side is a gather
+(<code>x[i]</code>) minus a scalar reduction. The vocabulary axis is summed away rather than
+written out, and XLA fuses the reduction into the preceding operation, so the intermediate
+never lands in memory at all.</p>
+<p>The numerics are unchanged.
+A stable <code>logsumexp</code> is computed as <code>m + log &Sigma; exp(x &minus; m)</code>
+with <code>m = max(x)</code> — the identical shift that <code>log_softmax</code> applies
+internally. Same arithmetic, same floating-point result, one fewer tensor. This one line is
+what made a KL-regularized run fit at all.</p>
+
+<h3 id="f4">4 · Fused linear cross-entropy: the logits never exist</h3>
+<p>The identity in (3) removes the <em>copy</em>, but the logits themselves are still built.
+The real fix is to never form them: split the tokens into tiles, and for each tile project
+hidden states to vocabulary, take the one number needed, and throw the tile away.</p>
+
+<div class="fml">
+peak = tile &times; V &times; 4 = 2,048 &times; 248,320 &times; 4 = <b>2.0 GB</b><br>
+<span class="c">versus 81.4 GB for the whole batch &mdash; a 40&times; reduction, constant in T</span>
+</div>
+
+<figure>
+<svg viewBox="0 0 700 272" width="100%" role="img" aria-label="Three approaches to computing target log-probabilities and what each keeps in memory.">
+  <g font-family="Lato,sans-serif" font-size="11" fill="#4a4a4a">
+    <text x="0" y="14">1 &middot; naive &mdash; build every logit</text>
+    <text x="0" y="106">2 &middot; tiled, standard autodiff &mdash; the trap</text>
+    <text x="0" y="196">3 &middot; tiled with a custom gradient</text>
+  </g>
+  <defs><marker id="arg" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#9a9a9a"/></marker>
+  <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#b3261e"/></marker></defs>
+  <g font-family="Lato,sans-serif" font-size="9.5">
+    <!-- row 1 -->
+    <rect x="0" y="24" width="54" height="32" rx="3" fill="#1772d0"/>
+    <text x="27" y="44" fill="#fff" text-anchor="middle">hidden</text>
+    <path d="M58 40 L80 40" stroke="#9a9a9a" stroke-width="1.4" marker-end="url(#arg)"/>
+    <rect x="84" y="24" width="420" height="32" rx="3" fill="#b3261e"/>
+    <text x="294" y="44" fill="#fff" text-anchor="middle" font-size="10.5">logits &mdash; 81,920 &times; 248,320 &nbsp;=&nbsp; 81.4 GB held in memory</text>
+    <path d="M508 40 L530 40" stroke="#9a9a9a" stroke-width="1.4" marker-end="url(#arg)"/>
+    <rect x="534" y="24" width="32" height="32" rx="3" fill="#127a3d"/>
+    <text x="574" y="44" fill="#7a7a7a">one number per token</text>
+    <text x="0" y="74" fill="#b3261e" font-size="10.5">larger than a chip on its own</text>
+
+    <!-- row 2 -->
+    <g fill="#127a3d">
+      <rect x="0" y="116" width="17" height="26" rx="2"/><rect x="20" y="116" width="17" height="26" rx="2"/>
+      <rect x="40" y="116" width="17" height="26" rx="2"/><rect x="60" y="116" width="17" height="26" rx="2"/>
+      <rect x="80" y="116" width="17" height="26" rx="2"/>
+    </g>
+    <text x="105" y="133" fill="#7a7a7a">forward tiles &mdash; small, correct</text>
+    <path d="M252 133 L292 133" stroke="#b3261e" stroke-width="1.5" marker-end="url(#arr)"/>
+    <rect x="296" y="116" width="276" height="26" rx="3" fill="#b3261e"/>
+    <text x="434" y="133" fill="#fff" font-size="10" text-anchor="middle">but autodiff saves each one &mdash; 81.4 GB again</text>
+    <text x="0" y="162" fill="#b3261e" font-size="10.5">tiled in appearance only; gradient checkpointing does not prevent this</text>
+
+    <!-- row 3 -->
+    <rect x="0" y="206" width="54" height="26" rx="3" fill="#1772d0"/>
+    <text x="27" y="223" fill="#fff" text-anchor="middle">hidden</text>
+    <text x="62" y="216" fill="#7a7a7a" font-size="9">forward keeps only this</text>
+    <text x="62" y="229" fill="#7a7a7a" font-size="9">(the residual &mdash; never the logits)</text>
+    <path d="M215 219 L245 219" stroke="#9a9a9a" stroke-width="1.4" marker-end="url(#arg)"/>
+    <rect x="250" y="206" width="44" height="26" rx="3" fill="#127a3d"/>
+    <text x="272" y="223" fill="#fff" text-anchor="middle">tile</text>
+    <text x="302" y="216" fill="#7a7a7a" font-size="9">backward recomputes one tile,</text>
+    <text x="302" y="229" fill="#7a7a7a" font-size="9">uses it, frees it &mdash; then the next</text>
+    <g fill="#e6efe9" stroke="#127a3d" stroke-dasharray="3 2">
+      <rect x="458" y="206" width="30" height="26" rx="3"/><rect x="492" y="206" width="30" height="26" rx="3"/><rect x="526" y="206" width="30" height="26" rx="3"/>
+    </g>
+    <text x="564" y="223" fill="#7a7a7a">one at a time</text>
+    <text x="0" y="252" fill="#127a3d" font-size="10.5">peak = 2,048 &times; 248,320 &times; 4 B = 2.0 GB &mdash; constant in context length</text>
+  </g>
+  <line x1="0" y1="88" x2="700" y2="88" stroke="#ededed"/><line x1="0" y1="180" x2="700" y2="180" stroke="#ededed"/>
+</svg>
+<figcaption><b>Fused linear cross-entropy.</b> Only the target token's log-probability is ever needed,
+so the full vocabulary distribution should never exist. The middle row is the part that catches people:
+a loop that tiles the forward pass still reconstructs the whole tensor in the backward pass, because
+automatic differentiation saves each tile's output to reuse it. Defining the gradient by hand &mdash;
+forward keeps hidden states, backward recomputes &mdash; is what makes the saving real.</figcaption>
+</figure>
+
+<p>This is where a subtlety cost me three attempts. Tiling the forward pass is easy; the
+problem is the backward pass. If you write the loop with a standard scan — even wrapped in
+gradient checkpointing — automatic differentiation saves every tile's logits so it can
+reuse them, stacks them back together, and reconstructs the exact 81 GB tensor you were
+avoiding. The loop looks tiled and is not.</p>
+
+<p>The fix is a <strong>custom gradient</strong>: it tells the compiler that the forward pass
+keeps only the hidden states, and that the backward pass should <em>recompute</em> one tile's
+logits at a time. Peak memory is then one tile in both directions, enforced by the gradient
+definition itself rather than left to the compiler's discretion.</p>
+<p class="src">Code: <code>_flce_target_logprobs</code> in <code>skyrl/backends/tunix_backend.py</code> —
+a <code>jax.custom_vjp</code> whose forward residual is deliberately the hidden tiles, never the logits.</p>
+
+<div class="note">
+<b>Not a kernel.</b> Worth being precise, because "fused" invites the assumption: this is not a
+hand-written TPU kernel. There is no Pallas in it. It is a <em>custom gradient rule</em> — the
+arithmetic is still ordinary matrix multiplication that XLA compiles, and the only thing
+overridden is what the forward pass saves for the backward pass. The saving comes from changing
+the memory contract, not from a faster instruction sequence. The genuinely hand-written kernels
+in this stack are MaxText's (Section 2); this one is a hundred lines of JAX.
+</div>
+
+<h3 id="f5">5 · Keep the compiler to one shape</h3>
+<p>XLA compiles a separate program for every tensor shape it is given, and each program
+reserves its own block of memory to work in. Feed it many shapes and those blocks pile up —
+tens of gigabytes each — until a new shape has nowhere left to load. Measured on this
+workload, the reserved block grows at roughly</p>
+<div class="fml">
+reserved block &asymp; 450 MB per 1,000 tokens &nbsp; <span class="c">// a 4&times;20,480 tile needs ~37 GB</span>
+</div>
+<figure>
+<svg viewBox="0 0 700 190" width="100%" role="img" aria-label="Bucketed shapes accumulate several reserved memory blocks and overflow; one uniform shape needs only one.">
+  <g font-family="Lato,sans-serif" font-size="11.5" fill="#4a4a4a">
+    <text x="0" y="16">bucketing &mdash; 6 shapes, 22% padding wasted</text>
+    <text x="380" y="16">one shape &mdash; 60% padding wasted</text>
+  </g>
+  <line x1="0" y1="34" x2="320" y2="34" stroke="#b3261e" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="380" y1="34" x2="700" y2="34" stroke="#127a3d" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="322" y="31" font-family="Lato,sans-serif" font-size="9.5" fill="#b3261e" text-anchor="end">memory available on the chip</text>
+  <g font-family="Lato,sans-serif" font-size="9" fill="#fff" text-anchor="middle">
+    <rect x="0"  y="40" width="50" height="88" rx="3" fill="#5598e7"/><text x="25" y="88">4k</text>
+    <rect x="54" y="40" width="50" height="88" rx="3" fill="#3d7fd6"/><text x="79" y="88">8k</text>
+    <rect x="108" y="40" width="50" height="88" rx="3" fill="#2a6dc4"/><text x="133" y="88">12k</text>
+    <rect x="162" y="40" width="50" height="88" rx="3" fill="#1f5aa8"/><text x="187" y="88">16k</text>
+    <rect x="216" y="40" width="50" height="88" rx="3" fill="#17488c"/><text x="241" y="88">20k</text>
+    <rect x="270" y="40" width="50" height="88" rx="3" fill="#b3261e"/><text x="295" y="82">6th</text><text x="295" y="95">&#10007;</text>
+    <rect x="380" y="40" width="150" height="88" rx="3" fill="#127a3d"/><text x="455" y="82" font-size="11">one block, ~37 GB</text><text x="455" y="97" font-size="9.5">reused for every tile</text>
+  </g>
+  <text x="160" y="146" font-family="Lato,sans-serif" font-size="10.5" fill="#b3261e" text-anchor="middle">each new shape reserves its own block; none are released</text>
+  <text x="455" y="146" font-family="Lato,sans-serif" font-size="10.5" fill="#127a3d" text-anchor="middle">nothing accumulates, so nothing runs out</text>
+  <text x="0" y="176" font-family="Lato,sans-serif" font-size="10.5" fill="#7a7a7a">Less padding is the wrong thing to optimize when the cost of a second shape is a second reserved block.</text>
+</svg>
+<figcaption><b>Why the wasteful option wins.</b> Bucketing cuts padding from 60% to 22%, and it was
+still the wrong choice: six shapes meant six reserved blocks, and the run died when a seventh appeared.</figcaption>
+</figure>
+
+<p>I tried the clever approach first — bucketing sequences into a ladder of lengths to waste
+less padding — and it backfired: padding dropped from 60% to 22%, but six live memory blocks replaced
+one, and the run failed the moment a seventh shape appeared. What worked was the simpler
+approach, and the one MaxText and tunix follow by convention: <strong>pad everything to a single
+shape</strong>. One program, one reserved block, for the whole run. Roughly 60% of the tokens in a tile
+are then padding — real compute, spent on nothing — and it is still the better trade, because
+the alternative does not run at all.</p>
+
+<div class="note">
+<b>What would reclaim it &mdash; and why it is not a kernel.</b> Splash attention already skips the
+future half of the causal mask, but it cannot skip padding, because nothing tells it where the
+padding is: the MaxText path discards the padding mask and never receives <code>segment_ids</code>.
+Fixing that alone would not buy much, because attention is not where the waste sits. The q/k/v/o
+projections, the MLP and the cross-entropy tiles are per-token dense operations with no mask to
+consult, so a padded position costs exactly what a real one costs in every one of them. The
+actual fix is <strong>sequence packing</strong>: concatenate several real sequences into one row
+behind a block-diagonal mask, so the filler becomes other sequences' tokens and the dense layers
+do useful work. That requires <code>segment_ids</code> plumbed through to MaxText's decoder,
+which is deeper than a configuration change, and it is the largest unclaimed win left here.
+</div>
+
+<h3 id="f6">6 · The leak that hid behind all of it</h3>
+<p>With one shape and fused cross-entropy, a training step still died — deterministically,
+around the 55th tile of 92, always with the same "cannot allocate" message. Memory grew
+~170 MB per tile, with nothing in my code to explain it.</p>
+
+<p>Instrumentation settled it. Logging every live array on the chip every ten tiles showed
+watched one shape's count climb: <code>[4, 16384, 5120]</code>, one more copy per tile,
+forever. Those are hidden states — and MaxText's decoder <em>sows</em> them into the model
+object as a debugging convenience. Under JAX's functional-object wrapper, changes a model
+makes to itself during a compiled call persist after it. Ninety-two calls, ninety-two
+retained copies. The fix is one line, executed after each tile:</p>
+
+<pre><code>nnx.pop(model, nnx.Intermediate)   # discard sown intermediates</code></pre>
+
+<p>Memory went flat at 29.1 GB across all 92 tiles, and the first end-to-end training step
+completed. Two related fixes landed with it: gradient accumulation moved <em>inside</em> the
+compiled function with its buffer donated (the previous version kept three copies of the
+gradients alive), and the out-of-memory handler learned to retry gently before evicting the
+compiled program — the old handler turned a single transient failure into an unrecoverable
+spiral by discarding the very program it needed to reload.</p>
+
+<h2 id="cookbook">11. Cookbook</h2>
+
+<p>Everything in this post runs from one repository. The recipes below create and tear down
+their own slices, so the only prerequisites are credentials and capacity.</p>
+
+<div class="cook">
+<span class="tag">Recipe 0 · setup</span>
+<p>Clone with submodules — the <code>tpu-inference</code> fork carries the runtime-LoRA
+hooks from Section 5, and is source-installed rather than patched at deploy time:</p>
+<pre><code>git clone --recurse-submodules https://github.com/SachinKonan/SkyRLTpu.git
+cd SkyRLTpu</code></pre>
+<p>Authenticate. TPU v5p capacity has to exist in the default project — a v5p-16 for the
+math-RL recipe, a v5p-32 for long context:</p>
+<pre><code>gcloud auth login
+gcloud config set project &lt;your-gcp-project&gt;
+
+export ZONE=&lt;zone-with-v5p-capacity&gt;</code></pre>
+<p>Then point the three caches of Section 6 at a bucket you own. Skipping this costs roughly
+an hour of cold compilation and download on every fresh slice:</p>
+<pre><code>export TUNIX_MAXTEXT_CKPT_CACHE_GCS=gs://&lt;your-bucket&gt;/skyrl-maxtext-ckpts
+export HF_CACHE_GCS=gs://&lt;your-bucket&gt;/hf-cache
+export VLLM_XLA_CACHE_GCS=gs://&lt;your-bucket&gt;/vllm-xla-cache</code></pre>
+<p>Commands are invoked through <code>uv</code>; the scripts provision the hosts themselves.</p>
+</div>
+
+<div class="cook">
+<span class="tag">Recipe 1 · math-RL, Qwen3.5-27B, v5p-16</span>
+<p>The 180-step run from Section 9. One command owns the whole lifecycle — queued-resource
+creation, colocated bring-up, client launch, and resume after preemption.</p>
+<pre><code>./tpu/autoresume_run.sh tpu/runs/qwen35-27b.env</code></pre>
+<p>The env file is the entire specification:</p>
+<pre><code>MODEL_NAME=Qwen/Qwen3.5-27B
+TUNIX_MAXTEXT_MODEL_NAME=qwen3.5-27b
+TUNIX_MAXTEXT_PIP_SPEC="maxtext @ git+https://github.com/SachinKonan/maxtext.git@skyrl/qwen35-dense"
+TRAIN_WORKERS=0            # host 0 trains
+VLLM_WORKERS=1             # host 1 samples
+TRAIN_MICRO_BATCH_SIZE=8
+GROUP_SIZE=8  GROUPS_PER_BATCH=32   # 256 rollouts / step
+MAX_TOKENS=512  LORA_RANK=32  LEARNING_RATE=2e-5
+STREAM_NUM_MINIBATCHES=8   # pipelined overlap
+RENDERER_NAME=qwen3_5_disable_thinking
+MAX_STEPS=180  SAVE_EVERY=20  EVAL_EVERY=20</code></pre>
+</div>
+
+<div class="cook">
+<span class="tag">Recipe 2 · long-context discovery, 20,480 tokens, v5p-32</span>
+<p>The configuration this post's second half exists to support: the model thinks for
+thousands of tokens, writes a program, and the program's measured quality is the reward.
+Server first — note the single fixed shape and the fused cross-entropy tile:</p>
+<pre><code>TINKER_BACKEND=tunix  MODEL_NAME=Qwen/Qwen3.5-27B \
+TRAIN_WORKERS=0  VLLM_WORKERS=1,2,3 \
+TUNIX_UNIFORM_SEQ_LEN=20480 \    # one program shape, ever  (fix 5)
+TUNIX_TRAIN_TOKEN_BUDGET=81920 \ # 4 sequences x 20480      (fix 2)
+TUNIX_FLCE_TILE_SIZE=2048 \      # fused linear CE tile     (fix 4)
+TUNIX_MAXTEXT_KWARGS='{"num_vocab_tiling": 8}' \
+  ./tpu/start_colocated_vllm_tinker.sh</code></pre>
+<p>Then the client, on the training host:</p>
+<pre><code>EXPERIMENT_NAME=erdos-qwen35  TTD_ENV=erdos_min_overlap \
+PHASE1_MAX_TOKENS=15872  CONTEXT_WINDOW=20480  TTD_TRAIN_MAX_SEQ=20480 \
+GROUP_SIZE=16  GROUPS_PER_BATCH=32  KL_PENALTY_COEF=0 \
+  bash tpu/run_ttd_on_tpu_host.sh</code></pre>
+<p><code>PHASE1_MAX_TOKENS</code> is the thinking budget; the remaining ~4.6k tokens are
+reserved so the model can always finish writing its program. Sizing that tail is empirical —
+I measured real program lengths (1.2k&ndash;5.3k tokens) and left room for the largest.</p>
+</div>
+
+<h2 id="next">12. What next</h2>
+
+<p>Two directions are open, and they are hard for different reasons. One is a
+serving problem I partly solved and do not fully trust; the other is a capacity
+problem I have not attempted.</p>
+
+<h3 id="moe">Mixture-of-experts, and where adapters attach</h3>
+
+<p>Everything above trains <em>dense</em> models. The obvious way to get more capability
+per unit of compute is a mixture-of-experts model, where each token is routed to a few
+of many expert networks. I built the path for <strong>gpt-oss-20b</strong> and it works,
+but it required breaking an assumption that holds everywhere else in this stack.</p>
+
+<p>The assumption is that a LoRA adapter can be <em>attached</em> to a layer. In a dense
+model, vLLM wraps each target layer so the adapter is applied at runtime — which is what
+makes hot-swapping cheap, and is the mechanism Section 5 depends on. In an MoE model on
+TPU, vLLM fuses all experts into one large tensor and runs them as a single batched
+operation, because doing otherwise would be far slower. There is no per-expert layer left
+to wrap: the abstraction the adapter needs has been optimized away.</p>
+
+<p>It is worth the trouble because adapting attention alone is not equivalent. The LoRA result
+in Section&nbsp;4 holds only when the adapter covers the MLP layers &mdash; and in a
+mixture-of-experts model, the MLP <em>is</em> the experts. Skipping them is precisely the
+capacity-constrained case the analysis warns about, so an MoE model trained through attention
+only is not the same experiment.</p>
+
+<figure>
+<svg viewBox="0 0 700 260" width="100%" role="img" aria-label="Dense models attach LoRA adapters at runtime; MoE models require merging adapter deltas into fused expert weights at load time.">
+  <g font-family="Lato,sans-serif" font-size="11.5" fill="#4a4a4a">
+    <text x="0" y="16">dense &mdash; adapter attaches</text><text x="380" y="16">MoE &mdash; adapter must be merged</text>
+  </g>
+  <!-- dense -->
+  <g font-family="Lato,sans-serif" font-size="10" text-anchor="middle">
+    <rect x="0" y="30" width="150" height="30" rx="3" fill="#1772d0"/><text x="75" y="50" fill="#fff">attention layer</text>
+    <rect x="160" y="32" width="52" height="26" rx="3" fill="#9ec5f4" stroke="#1772d0"/><text x="186" y="49" fill="#12508f">LoRA</text>
+    <rect x="0" y="70" width="150" height="30" rx="3" fill="#1772d0"/><text x="75" y="90" fill="#fff">MLP layer</text>
+    <rect x="160" y="72" width="52" height="26" rx="3" fill="#9ec5f4" stroke="#1772d0"/><text x="186" y="89" fill="#12508f">LoRA</text>
+    <text x="106" y="126" fill="#127a3d" font-size="10.5">swap a pointer &mdash; base weights untouched</text>
+    <text x="106" y="142" fill="#7a7a7a" font-size="10">new adapter version: ~instant</text>
+  </g>
+  <!-- MoE -->
+  <g font-family="Lato,sans-serif" font-size="10" text-anchor="middle">
+    <rect x="380" y="30" width="150" height="30" rx="3" fill="#1772d0"/><text x="455" y="50" fill="#fff">attention layer</text>
+    <rect x="540" y="32" width="52" height="26" rx="3" fill="#9ec5f4" stroke="#1772d0"/><text x="566" y="49" fill="#12508f">LoRA</text>
+    <text x="620" y="49" fill="#127a3d" font-size="9.5" text-anchor="start">native path</text>
+    <rect x="380" y="70" width="212" height="46" rx="3" fill="#e08b2e"/>
+    <text x="486" y="89" fill="#fff">fused expert tensor</text><text x="486" y="104" fill="#fbe9d3" font-size="9">all experts, one operation &mdash; nothing to wrap</text>
+    <path d="M486 138 L486 120" stroke="#b3261e" stroke-width="1.6" marker-end="url(#arm)"/>
+    <defs><marker id="arm" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#b3261e"/></marker></defs>
+    <rect x="392" y="140" width="188" height="28" rx="3" fill="#fff" stroke="#b3261e"/>
+    <text x="486" y="158" fill="#b3261e" font-size="9.5">apply_moe_lora_deltas &mdash; custom RPC</text>
+    <rect x="392" y="180" width="188" height="26" rx="3" fill="#f5f5f5" stroke="#c9c9c9"/>
+    <text x="486" y="197" fill="#4a4a4a" font-size="9.5">LoRA factors, shipped per worker</text>
+    <text x="486" y="226" fill="#b3261e" font-size="10.5">rewrite the weights &mdash; every adapter version</text>
+  </g>
+  <line x1="340" y1="24" x2="340" y2="240" stroke="#ededed"/>
+  <text x="0" y="252" font-family="Lato,sans-serif" font-size="10.5" fill="#7a7a7a">One exported adapter, two delivery mechanisms: attention through vLLM&#39;s native path, experts through a merge.</text>
+</svg>
+<figcaption><b>Adapter binding.</b> A dense adapter is applied at inference time and can be swapped
+freely. Fusing the experts removes the attachment point, so the adapter has to be merged into the
+weights when it loads — which makes each new policy version a weight rewrite rather than a pointer swap.</figcaption>
+</figure>
+
+<p>The resolution is to split the exported adapter in two. The attention projections ship as a
+standard PEFT directory and take vLLM's native path. The expert factors ship as a sidecar and are
+<strong>merged into the fused tensor at load time</strong>, through a custom collective RPC —
+<code>apply_moe_lora_deltas</code> — that hands each worker its factors and adds them in place.
+Getting there also meant disabling vLLM's own MoE-LoRA wrapper on TPU, which fails to boot against
+bf16 experts.</p>
+<p class="src">Code: <code>tpu/vllm_tpu_server.py</code> plus the <code>tpu-inference</code> fork
+(merge extraction, donated in-place adds, equivalence tests against incremental merges).</p>
+
+<h3 id="nans">The instability I have not solved</h3>
+
+<p>This path runs, and it is not yet trustworthy. Sampling occasionally returns
+<strong>NaN log-probabilities</strong> for individual tokens. Downstream that is catastrophic
+rather than merely noisy, because the RL loss exponentiates a difference of log-probabilities:</p>
+
+<div class="fml">
+ratio = exp( train_logprob &minus; sampling_logprob )<br>
+sampling_logprob = &minus;1e4 <span class="c">&nbsp; &nbsp;// the clamp standing in for NaN</span><br>
+&rarr; ratio = exp(1e4) = <b>inf</b> <span class="c">&nbsp; &nbsp; &nbsp; &nbsp;// one token poisons the batch</span>
+</div>
+
+<p>The current defense is three layers deep, and every layer is containment rather than a cure.
+NaNs are clamped to a sentinel value at the source in the fork; any token carrying that sentinel
+has its loss weight zeroed <em>and</em> its value neutralized (a zero weight is not enough — <code>inf &times; 0</code>
+is NaN inside a compiled function); and non-finite optimizer updates are skipped outright. The
+gradient is protected. What I still cannot say is <em>why</em> the fused MoE path produces NaN
+log-probabilities in the first place — whether it is an overflow in the bf16 expert matmuls, the
+router, or the merge itself. Until that is answered I would not run a long MoE job unattended.</p>
+
+<h3 id="bigger">Larger models: is tensor parallelism the answer?</h3>
+
+<p>Nothing here has been run on a model larger than 27B on my own hardware. (A 120B model appears
+in my results, but those runs used hosted infrastructure, not this stack.) The arithmetic for
+attempting it is simple enough to state:</p>
+
+<div class="fml">
+weights per chip = 2 &times; 120e9 / C<br>
+C = 4 &nbsp;(1 host)&nbsp; &rarr; 60 GB/chip <span class="c">&nbsp;// ~35 GB left; a 20k memory block alone needs 37 GB &mdash; no</span><br>
+C = 8 &nbsp;(2 hosts) &rarr; 30 GB/chip <span class="c">&nbsp;// ~65 GB left &mdash; comfortable</span><br>
+C = 16 (4 hosts) &rarr; 15 GB/chip <span class="c">&nbsp;// ample</span>
+</div>
+
+<p>So <strong>tensor parallelism is probably not what I need</strong>.
+TP earns its place when a single tensor is too large for one chip; here no individual tensor is the
+problem, total capacity is — and capacity is what sharding across <em>more</em> chips buys. The
+natural move for 120B is multi-host FSDP over two or four hosts, not a different parallelism strategy
+within one.</p>
+
+<p>That is also the honest description of the blocker: my backend trains on a single host by
+construction, and refuses more. Multi-host is not a missing flag but a missing mechanism — every
+process must execute the same compiled program in lockstep, which means a coordinator broadcasting
+each operation to workers. SkyRL's original JAX backend already implements exactly that pattern, so
+the work is porting it rather than inventing it.</p>
+
+<p>I did try tensor parallelism, out of curiosity and because it would have shrunk the memory
+footprint of a training tile. Two configurations, two different failures: splitting four chips as
+2&times;2 left <strong>0.7 GB free</strong> after loading the model, against 27&ndash;29 GB under plain
+FSDP, for reasons I never isolated; and a 4-way tensor split failed inside the attention kernel,
+which requires its mask blocks to divide evenly across devices — the same divisibility rule from
+Section 3, reappearing one level down. Both are recorded as measurements rather than conclusions.</p>
+
+<p style="margin-top:34px;padding-top:20px;border-top:1px solid var(--rule);font-size:13.5px;color:var(--ink-3);">
+Built on <a href="https://github.com/NovaSky-AI/SkyRL">SkyRL</a>,
+<a href="https://github.com/AI-Hypercomputer/maxtext">MaxText</a>,
+<a href="https://github.com/google/tunix">tunix</a>, and
+<a href="https://github.com/vllm-project/vllm">vLLM</a>.
+Measurements come from runs on v5p-16 and v5p-32 slices; the model-parallelism, memory, and
+timing figures quoted here were instrumented on those runs rather than estimated.
+</p>
+
+</article>
+</div>
+
+<script>
+// sidebar: collapsible groups + highlight the section currently in view
+(function(){
+  var groups = Array.prototype.slice.call(document.querySelectorAll('nav.toc .grp'));
+  function setOpen(grp, open){
+    var tw = grp.querySelector('.tw'), kids = grp.querySelector('.kids');
+    tw.classList.toggle('open', open);
+    kids.classList.toggle('open', open);
+    tw.setAttribute('aria-expanded', open ? 'true' : 'false');
+    tw.setAttribute('aria-label', (open ? 'Hide' : 'Show') + ' subsections');
+  }
+  groups.forEach(function(grp){
+    grp.querySelector('.tw').addEventListener('click', function(){
+      setOpen(grp, !grp.querySelector('.kids').classList.contains('open'));
+    });
+  });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a[href^="#"]'));
+  var targets = links.map(function(a){ return document.getElementById(a.getAttribute('href').slice(1)); });
+  function sync(){
+    var best = 0, y = window.scrollY + 110;
+    targets.forEach(function(t, i){ if (t && t.offsetTop <= y) best = i; });
+    links.forEach(function(a, i){ a.classList.toggle('on', i === best); });
+  }
+  window.addEventListener('scroll', sync, {passive:true});
+  window.addEventListener('resize', sync);
+  sync();
+})();
+</script>
+</body></html>
