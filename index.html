@@ -43,10 +43,10 @@
               </p>
               <br>
               <p>
-                I am a Ph.D. student in Computer Science at Princeton University, advised by Prof. <a href="https://liuzhuang13.github.io/">Zhuang Liu</a>. I received my BS in Computer Science from Georgia Tech in 2022.
+                I am a Ph.D. student in Computer Science at <span class="princeton">Princeton University</span>, advised by Prof. <a href="https://liuzhuang13.github.io/">Zhuang Liu</a>. I received my BS in Computer Science from <span class="gatech">Georgia Tech</span> in 2022.
               </p>
               <p>
-                At Georgia Tech, I was fortunate to be advised by <a href="https://core-robotics.gatech.edu/people/matthew-gombolay/">Matthew Gombolay</a> and worked as a TA for <a href="https://sites.cc.gatech.edu/fac/Constantinos.Dovrolis/">Constantinos Dovrolis</a>. From 2022-2025, I worked at Two Sigma in the Metadata Team, where I frequently collaborated with <a href="https://people.csail.mit.edu/rudolph/">Larry Rudolph</a> in the Labs Team.
+                At <span class="gatech">Georgia Tech</span>, I was fortunate to be advised by <a href="https://core-robotics.gatech.edu/people/matthew-gombolay/">Matthew Gombolay</a> and worked as a TA for <a href="https://sites.cc.gatech.edu/fac/Constantinos.Dovrolis/">Constantinos Dovrolis</a>. From 2022-2025, I worked at <span class="twosigma">Two Sigma</span> in the Metadata Team, where I frequently collaborated with <a href="https://people.csail.mit.edu/rudolph/">Larry Rudolph</a> in the Labs Team.
               </p>
             </td>
             <td style="padding:0 2.5% 2.5%;width:40%;max-width:40%;vertical-align:top">
@@ -55,6 +55,50 @@
           </tr>
         </tbody></table>
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+          <tr onmouseout="paperscorer_stop()" onmouseover="paperscorer_start()">
+            <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
+              <div class="one">
+                <div class="two" id='paperscorer_2'><img src="images/paperscorer_2.png" class="icon" alt="PaperScorer accuracy by ICLR human rating percentile"></div>
+                <img id='paperscorer_1' src="images/paperscorer_1.png" class="icon" alt="PaperScorer pipeline">
+              </div>
+              <script type="text/javascript">
+                function paperscorer_start() {
+                  document.getElementById('paperscorer_2').style.opacity = "1";
+                }
+
+                function paperscorer_stop() {
+                  document.getElementById('paperscorer_2').style.opacity = "0";
+                }
+                paperscorer_stop()
+              </script>
+            </td>
+            <td style="padding:20px;width:75%;vertical-align:middle">
+              <a href="PaperScorer.html">
+                <papertitle>PaperScorer: How Predictable Is Paper Acceptance?</papertitle>
+              </a>
+              <br>
+              <strong>Sachin Konan</strong>,
+              Jonathan Liu,
+              <a href="https://liuzhuang13.github.io/">Zhuang Liu</a>
+              <br>
+              <em>Conference on Neural Information Processing Systems (NeurIPS)</em>, 2026
+              <br>
+              Official:
+              <span class="unlinked" title="arXiv coming soon">Paper</span> /
+              <a href="https://paperscorer-ai.com/">Website</a> /
+              <a href="PaperScorer.html">Blog</a> /
+              <a href="https://huggingface.co/collections/zlab-princeton/paperscorer">Huggingface</a> /
+              <a href="https://github.com/zlab-princeton/PaperScorer">Code</a>
+              <br>
+              <p>
+                <strong> TLDR;</strong>
+                Can you predict whether a paper gets accepted from the paper alone? PaperScorer reads a fully anonymized
+                paper, as page screenshots or extracted text, and outputs a calibrated chance of acceptance.
+                PaperScorer-Vision reaches 68.3% balanced accuracy on ICLR and 77.5% on arXiv, beating Gemini-3.1-Pro and
+                GPT-5.5, and stays accurate on the highest-rated papers, where frontier models fall off.
+              </p>
+            </td>
+          </tr>
           <tr onmouseout="fst_stop()" onmouseover="fst_start()">
             <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
               <div class="one">
@@ -90,7 +134,8 @@
               <a href="https://aclanthology.org/2024.naacl-industry.21.pdf">Paper</a> /
               <a href="assets/fst_video.mp4">Video</a> /
               <a href="assets/fst_poster.pdf">Poster</a> /
-              <a href="https://github.com/twosigma/functional_semantic_types">Code</a>
+              <a href="https://github.com/twosigma/functional_semantic_types">Code</a> /
+              <a href="https://www.twosigma.com/articles/semantic-types-from-computer-centric-to-human-centric-data-types/">Blog</a>
               <br>
               <p>
                 <strong> TLDR;</strong>
@@ -287,20 +332,7 @@
               </p>
             </td>
           </tr>
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-          <tbody>
-            <tr style="padding:0px">
-              <td style="padding:2.5% 2.5% 0;width:63%;vertical-align:left">
-                <p>
-                  Also, I wrote a <a href="https://www.twosigma.com/articles/semantic-types-from-computer-centric-to-human-centric-data-types/">blog post</a>
-                  about the benefits of migrating datatable schemas from primitive data-types to entity-driven data-types,
-                  called Semantic Types. In <a href="https://aclanthology.org/2024.naacl-industry.21.pdf">FSTO-Gen</a>, I used LLMs to automatically generate
-                    these types to automatically structure data.
-                </p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        </tbody></table>
 
   
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>

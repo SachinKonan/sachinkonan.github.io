@@ -135,6 +135,24 @@ name {
   -webkit-transition: opacity .2s ease-in-out;
 }
 
+/* institution names in the bio, in brand colors */
+span.princeton {
+  color: #E77500;
+}
+
+span.gatech {
+  color: #B3A369;
+}
+
+span.twosigma {
+  color: #00A5BD;
+}
+
+/* a link label with no target yet (e.g. a paper not on arXiv) */
+span.unlinked {
+  color: #999999;
+}
+
 span.highlight {
   background-color: #ffffd0;
 }
