@@ -150,6 +150,8 @@ span.gatech {
 
 span.twosigma {
   color: #00A5BD;
+  font-weight: 700;
+  font-style: italic;
 }
 
 /* wide hover-swap figure box (12:5), used where a 160px square is too small */
