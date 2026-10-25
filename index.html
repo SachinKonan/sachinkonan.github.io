@@ -46,7 +46,7 @@
                 I am a Ph.D. student in Computer Science at <span class="princeton">Princeton University</span>, advised by Prof. <a href="https://liuzhuang13.github.io/">Zhuang Liu</a>. I received my BS in Computer Science from <span class="gatech">Georgia Tech</span> in 2022.
               </p>
               <p>
-                At <span class="gatech">Georgia Tech</span>, I was fortunate to be advised by <a href="https://core-robotics.gatech.edu/people/matthew-gombolay/">Matthew Gombolay</a> and worked as a TA for <a href="https://sites.cc.gatech.edu/fac/Constantinos.Dovrolis/">Constantinos Dovrolis</a>. From 2022-2025, I worked at <span class="twosigma">Two Sigma</span> in the Metadata Team, where I frequently collaborated with <a href="https://people.csail.mit.edu/rudolph/">Larry Rudolph</a> in the Labs Team.
+                At <span class="gatech">Georgia Tech</span>, I was fortunate to be advised by <a href="https://core-robotics.gatech.edu/people/matthew-gombolay/">Matthew Gombolay</a> and worked as a TA for <a href="https://sites.cc.gatech.edu/fac/Constantinos.Dovrolis/">Constantinos Dovrolis</a>. From 2022-2025, I worked at <span class="twosigma">Two Sigma</span> in the Metadata Team, where I collaborated with <a href="https://people.csail.mit.edu/rudolph/">Larry Rudolph</a> in the Labs Team.
               </p>
             </td>
             <td style="padding:0 2.5% 2.5%;width:40%;max-width:40%;vertical-align:top">
@@ -55,11 +55,13 @@
           </tr>
         </tbody></table>
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-          <tr onmouseout="paperscorer_stop()" onmouseover="paperscorer_start()">
-            <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
-              <div class="one">
-                <div class="two" id='paperscorer_2'><img src="images/paperscorer_2.png" class="icon" alt="PaperScorer accuracy by ICLR human rating percentile"></div>
-                <img id='paperscorer_1' src="images/paperscorer_1.png" class="icon" alt="PaperScorer pipeline">
+          <tr class="wide-entry" onmouseout="paperscorer_stop()" onmouseover="paperscorer_start()">
+            <td colspan="2" style="padding:0">
+            <div class="wide-entry-flex">
+            <div class="wide-entry-fig">
+              <div class="one wide">
+                <div class="two wide" id='paperscorer_2'><img src="images/paperscorer_2.png" class="wide" alt="PaperScorer accuracy by ICLR human rating percentile"></div>
+                <img id='paperscorer_1' src="images/paperscorer_1.png" class="wide" alt="PaperScorer pipeline">
               </div>
               <script type="text/javascript">
                 function paperscorer_start() {
@@ -71,8 +73,8 @@
                 }
                 paperscorer_stop()
               </script>
-            </td>
-            <td style="padding:20px;width:75%;vertical-align:middle">
+            </div>
+            <div class="wide-entry-text">
               <a href="PaperScorer.html">
                 <papertitle>PaperScorer: How Predictable Is Paper Acceptance?</papertitle>
               </a>
@@ -81,7 +83,7 @@
               Jonathan Liu,
               <a href="https://liuzhuang13.github.io/">Zhuang Liu</a>
               <br>
-              <em>Conference on Neural Information Processing Systems (NeurIPS)</em>, 2026
+              <em>Conference on Neural Information Processing Systems (NeurIPS)</em>,&nbsp;2026
               <br>
               Official:
               <span class="unlinked" title="arXiv coming soon">Paper</span> /
@@ -90,13 +92,15 @@
               <a href="https://huggingface.co/collections/zlab-princeton/paperscorer">Huggingface</a> /
               <a href="https://github.com/zlab-princeton/PaperScorer">Code</a>
               <br>
-              <p>
+              <p style="text-wrap:pretty">
                 <strong> TLDR;</strong>
                 Can you predict whether a paper gets accepted from the paper alone? PaperScorer reads a fully anonymized
                 paper, as page screenshots or extracted text, and outputs a calibrated chance of acceptance.
                 PaperScorer-Vision reaches 68.3% balanced accuracy on ICLR and 77.5% on arXiv, beating Gemini-3.1-Pro and
-                GPT-5.5, and stays accurate on the highest-rated papers, where frontier models fall off.
+                GPT-5.5, and stays accurate on the highest-rated papers, where frontier models&nbsp;fall&nbsp;off.
               </p>
+            </div>
+            </div>
             </td>
           </tr>
           <tr onmouseout="fst_stop()" onmouseover="fst_start()">

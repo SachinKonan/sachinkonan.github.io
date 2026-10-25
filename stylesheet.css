@@ -138,14 +138,66 @@ name {
 /* institution names in the bio, in brand colors */
 span.princeton {
   color: #E77500;
+  font-weight: 700;
+  font-style: italic;
 }
 
 span.gatech {
   color: #B3A369;
+  font-weight: 700;
+  font-style: italic;
 }
 
 span.twosigma {
   color: #00A5BD;
+}
+
+/* wide hover-swap figure box (12:5), used where a 160px square is too small */
+.one.wide,
+.two.wide {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  aspect-ratio: 12 / 5;
+}
+
+img.wide {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* a full-width entry: wide figure beside the text, stacked on phones */
+.wide-entry-flex {
+  display: flex;
+  align-items: center;
+}
+
+.wide-entry-fig {
+  flex: 0 0 55%;
+  box-sizing: border-box;
+  padding: 20px 20px 0;
+}
+
+.wide-entry-text {
+  flex: 1 1 45%;
+  box-sizing: border-box;
+  padding: 20px;
+}
+
+@media (max-width: 600px) {
+  .wide-entry-flex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .wide-entry-fig {
+    flex-basis: auto;
+    padding: 20px 10px 0;
+  }
+  .wide-entry-text {
+    flex-basis: auto;
+    padding: 12px 10px 20px;
+  }
 }
 
 /* a link label with no target yet (e.g. a paper not on arXiv) */
