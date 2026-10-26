@@ -116,7 +116,6 @@
                     document.getElementById('fst_2').style.opacity = "0";
                     document.getElementById('fst_1').style.opacity = "1";
                   }
-                  merge_split_stop()
                 </script>
             </td>
             <td style="padding:20px;width:75%;vertical-align:middle">
@@ -279,7 +278,7 @@
               <p>
                 <strong> TLDR;</strong>
                 Directed Graphs contain important dependencies and whose structure may be sensitive. Previous work has shown
-                that node deanonymization <a href="https://www.cs.utexas.edu/~shmat/shmat_oak09.pdf">isn't enough</a>
+                that node deanonymization <a href="https://www.cs.cornell.edu/~shmat/shmat_oak09.pdf">isn't enough</a>
                 so we protect against subgraph isomorphism and <a href="https://en.wikipedia.org/wiki/Sybil_attack">
                 Sybil attacks</a> through the use of random perturbations (Merge-Split). For usability, the perturbed graph has to
                 maintain similarity to the original, which is achieved by minimizing the change in the graph's eigenspace. Our
