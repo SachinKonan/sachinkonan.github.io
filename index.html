@@ -55,13 +55,11 @@
           </tr>
         </tbody></table>
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-          <tr class="wide-entry" onmouseout="paperscorer_stop()" onmouseover="paperscorer_start()">
-            <td colspan="2" style="padding:0">
-            <div class="wide-entry-flex">
-            <div class="wide-entry-fig">
-              <div class="one wide">
-                <div class="two wide" id='paperscorer_2'><img src="images/paperscorer_2.png" class="wide" alt="PaperScorer accuracy by ICLR human rating percentile"></div>
-                <img id='paperscorer_1' src="images/paperscorer_1.png" class="wide" alt="PaperScorer pipeline">
+          <tr onmouseout="paperscorer_stop()" onmouseover="paperscorer_start()">
+            <td style="padding:20px 20px 0;width:25%;vertical-align:middle">
+              <div class="one short">
+                <div class="two short" id='paperscorer_2'><img src="images/paperscorer_2.png" class="icon" alt="PaperScorer accuracy by ICLR human rating percentile"></div>
+                <img id='paperscorer_1' src="images/paperscorer_1.png" class="icon" alt="PaperScorer pipeline">
               </div>
               <script type="text/javascript">
                 function paperscorer_start() {
@@ -73,8 +71,8 @@
                 }
                 paperscorer_stop()
               </script>
-            </div>
-            <div class="wide-entry-text">
+            </td>
+            <td style="padding:20px;width:75%;vertical-align:middle">
               <a href="PaperScorer.html">
                 <papertitle>PaperScorer: How Predictable Is Paper Acceptance?</papertitle>
               </a>
@@ -99,8 +97,6 @@
                 PaperScorer-Vision reaches 68.3% balanced accuracy on ICLR and 77.5% on arXiv, beating Gemini-3.1-Pro and
                 GPT-5.5, and stays accurate on the highest-rated papers, where frontier models&nbsp;fall&nbsp;off.
               </p>
-            </div>
-            </div>
             </td>
           </tr>
           <tr onmouseout="fst_stop()" onmouseover="fst_start()">
