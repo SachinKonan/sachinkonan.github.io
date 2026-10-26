@@ -160,11 +160,6 @@ span.twosigma {
   height: 100px;
 }
 
-/* a link label with no target yet (e.g. a paper not on arXiv) */
-span.unlinked {
-  color: #999999;
-}
-
 span.highlight {
   background-color: #ffffd0;
 }
