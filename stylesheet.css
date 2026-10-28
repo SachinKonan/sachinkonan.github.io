@@ -79,7 +79,7 @@ img.circle {
 }
 
 img.icon {
-  width: 160px;
+  width: 200px;
 }
 
 body,
@@ -115,14 +115,14 @@ name {
 }
 
 .one {
-  width: 160px;
-  height: 160px;
+  width: 200px;
+  height: 200px;
   position: relative;
 }
 
 .two {
-  width: 160px;
-  height: 160px;
+  width: 200px;
+  height: 200px;
   position: absolute;
   transition: opacity .2s ease-in-out;
   -moz-transition: opacity .2s ease-in-out;
@@ -154,12 +154,31 @@ span.twosigma {
   font-style: italic;
 }
 
-/* hover-swap box for a 160x100 (wide) thumbnail in the standard column */
+/* hover-swap box for a 200x125 (wide) thumbnail in the standard column */
 .one.short,
 .two.short {
-  height: 100px;
+  height: 125px;
 }
 
 span.highlight {
   background-color: #ffffd0;
+}
+
+/* phones: keep the original 160px thumbnails so the text column is not squeezed */
+@media (max-width: 600px) {
+  img.icon,
+  .one,
+  .two {
+    width: 160px;
+  }
+
+  .one,
+  .two {
+    height: 160px;
+  }
+
+  .one.short,
+  .two.short {
+    height: 100px;
+  }
 }
