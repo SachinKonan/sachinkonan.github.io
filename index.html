@@ -55,9 +55,9 @@
           </tr>
         </tbody></table>
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
-          <tr onmouseout="paperscorer_stop()" onmouseover="paperscorer_start()">
+          <tr>
             <td style="padding:20px 5px 0 20px;width:25%;vertical-align:middle">
-              <div class="one short">
+              <div class="one short" onmouseenter="paperscorer_start()" onmouseleave="paperscorer_stop()">
                 <div class="two short" id='paperscorer_2'><img src="images/paperscorer_2.png" class="icon" alt="PaperScorer accuracy by ICLR human rating percentile"></div>
                 <img id='paperscorer_1' src="images/paperscorer_1.png" class="icon" alt="PaperScorer pipeline">
               </div>
@@ -73,7 +73,7 @@
               </script>
             </td>
             <td style="padding:20px;width:75%;vertical-align:middle">
-              <a href="PaperScorer.html">
+              <a href="PaperScorer.html" onmouseenter="paperscorer_start()" onmouseleave="paperscorer_stop()">
                 <papertitle>PaperScorer: How Predictable Is Paper Acceptance?</papertitle>
               </a>
               <br>
@@ -86,10 +86,10 @@
               Official:
               <a href="https://arxiv.org/abs/2610.31791">Paper</a> /
               <a href="https://paperscorer-ai.com/">Website</a> /
+              <a href="https://x.com/SachinKonan/status/2114838507797782675">Tweet</a> /
               <a href="PaperScorer.html">Blog</a> /
               <a href="https://huggingface.co/collections/zlab-princeton/paperscorer">Huggingface</a> /
-              <a href="https://github.com/zlab-princeton/PaperScorer">Code</a> /
-              <a href="https://x.com/SachinKonan/status/2114838507797782675">Tweet</a>
+              <a href="https://github.com/zlab-princeton/PaperScorer">Code</a>
               <br>
               <p style="text-wrap:pretty">
                 <strong> TLDR;</strong>
