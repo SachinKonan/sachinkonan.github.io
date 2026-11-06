@@ -321,8 +321,9 @@ winner = <span class="tok-key">None</span>
           hotspots in red. From left to right, AbuPlace, Gemma alone, and Qwen continuing Gemma.</figcaption>
         </figure>
         <p class="wrap" style="margin-left:0; margin-top:18px">Each round's best program is itself an optimizer. Below,
-          the best program after each round places the same IBM chip, ibm01, from the same start for 300 seconds, and we
-          replay one run of each. All three lower the cost by 18 to 19%, and each later round ends a little lower.</p>
+          the best program after each round places the same chip from the same start for 300 seconds, and we replay one
+          run of each. We show one IBM chip, ibm01, and one NG45 chip, ariane133. On both, each later round ends a little
+          lower, though the gap between rounds 2 and 3 is within the noise of a single run.</p>
         <!-- Placement evolution, built by website/scripts/make_placement_evolution.py. Panels marked "synthetic data"
              are stand-ins until the real snapshot files exist. Re-run the script to refresh. -->
         <figure>
@@ -332,14 +333,18 @@ winner = <span class="tok-key">None</span>
                 <button class="pe-play" type="button" aria-label="Play"></button>
                 <input class="pe-scrub" type="range" min="0" max="1000" value="0" aria-label="Time through each run">
                 <span class="pe-time" aria-live="off">start</span>
+                <div class="pe-chips" role="group" aria-label="Chip">
+                  <button type="button" data-chip="ibm01" aria-pressed="true">ibm01</button>
+                  <button type="button" data-chip="ariane133" aria-pressed="false">ariane133</button>
+                </div>
               </div>
               <div class="pe-panels"></div>
             </div>
             <noscript><img src="assets/momo/placement_evolution_ibm01.svg" alt="ibm01 placements at five points in one run of each round's best program."></noscript>
             <img class="pe-print" loading="lazy" src="assets/momo/placement_evolution_ibm01.svg" alt="ibm01 placements at five points in one run of each round's best program.">
           </div>
-          <figcaption><span class="fig-n">Figure 9.</span> One run of the best program after each MOMO round on ibm01,
-          from the same start. Blocks are drawn at true size. The line under each chip is the lowest cost so far, and the gray line
+          <figcaption><span class="fig-n">Figure 9.</span> One run of the best program after each MOMO round, from the
+          same start. Blocks are drawn at true size. The line under each chip is the lowest cost so far, and the gray line
           is the cost of the layout being tried.</figcaption>
         </figure>
         <script defer src="assets/momo/placement_evolution.js"></script>
