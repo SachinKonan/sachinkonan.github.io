@@ -320,6 +320,29 @@ winner = <span class="tok-key">None</span>
           <figcaption><span class="fig-n">Figure 8.</span> IBM07 placements over the estimated routing congestion, with
           hotspots in red. From left to right, AbuPlace, Gemma alone, and Qwen continuing Gemma.</figcaption>
         </figure>
+        <p class="wrap" style="margin-left:0; margin-top:18px">Each round's best program is itself an optimizer. Below,
+          the best program after each round places the same IBM chip, ibm01, from the same start for 300 seconds, and we
+          replay one run of each. All three lower the cost by 18 to 19%, and each later round ends a little lower.</p>
+        <!-- Placement evolution, built by website/scripts/make_placement_evolution.py. Panels marked "synthetic data"
+             are stand-ins until the real snapshot files exist. Re-run the script to refresh. -->
+        <figure>
+          <div class="media-frame pad">
+            <div class="pe" data-pe-base="assets/momo/">
+              <div class="pe-bar">
+                <button class="pe-play" type="button" aria-label="Play"></button>
+                <input class="pe-scrub" type="range" min="0" max="1000" value="0" aria-label="Time through each run">
+                <span class="pe-time" aria-live="off">start</span>
+              </div>
+              <div class="pe-panels"></div>
+            </div>
+            <noscript><img src="assets/momo/placement_evolution_ibm01.svg" alt="ibm01 placements at five points in one run of each round's best program."></noscript>
+            <img class="pe-print" loading="lazy" src="assets/momo/placement_evolution_ibm01.svg" alt="ibm01 placements at five points in one run of each round's best program.">
+          </div>
+          <figcaption><span class="fig-n">Figure 9.</span> One run of the best program after each MOMO round on ibm01,
+          from the same start. Blocks are drawn at true size. The line under each chip is the lowest cost so far, and the gray line
+          is the cost of the layout being tried.</figcaption>
+        </figure>
+        <script defer src="assets/momo/placement_evolution.js"></script>
 
         <h3 class="sub">With added spacing, MOMO also passes the full OpenROAD flow.</h3>
         <p class="wrap" style="margin-left:0">A low proxy cost does not guarantee that later chip design steps succeed. The
@@ -334,7 +357,7 @@ winner = <span class="tok-key">None</span>
           <div class="media-frame pad">
             <img src="assets/momo/placement_gaps.svg" alt="Histograms of vertical gaps between stacked macros on ariane133 for MOMO, ArchGen, AbuPlace and MOMO with spacing.">
           </div>
-          <figcaption><span class="fig-n">Figure 9.</span> The gap from each block to the block stacked above it on
+          <figcaption><span class="fig-n">Figure 10.</span> The gap from each block to the block stacked above it on
           ariane133, after the flow's 12 µm spacing. The dashed line marks the 36 µm spacing we added.</figcaption>
         </figure>
         <p class="wrap" style="margin-left:0; margin-top:18px">The fix leaves the search program untouched. We give it
@@ -347,7 +370,7 @@ winner = <span class="tok-key">None</span>
           <div class="media-frame pad">
             <img src="assets/momo/placement_ng45.svg" alt="Proxy cost on four NG45 designs. MOMO is lowest on all four.">
           </div>
-          <figcaption><span class="fig-n">Figure 10.</span> Proxy cost on the four NG45 designs. MOMO here keeps the 36 µm
+          <figcaption><span class="fig-n">Figure 11.</span> Proxy cost on the four NG45 designs. MOMO here keeps the 36 µm
           spacing and searches for only 300 seconds, a tenth of the winners' budget.</figcaption>
         </figure>
         <div class="table-wrap">
@@ -413,7 +436,7 @@ winner = <span class="tok-key">None</span>
           <div class="media-frame pad">
             <img src="assets/momo/routing_performance.svg" alt="Routing reward over lineage steps for Gemma, then Gemma to Muse, then Gemma to Muse to Gemma, passing Hyra.">
           </div>
-          <figcaption><span class="fig-n">Figure 11.</span> Routing reward over the search, one line per round. The right
+          <figcaption><span class="fig-n">Figure 12.</span> Routing reward over the search, one line per round. The right
           panel enlarges rounds 2 and 3.</figcaption>
         </figure>
       </div>
