@@ -1,0 +1,34 @@
+/* MOMO-specific additions on top of style.css (the PaperScorer blog stylesheet, unchanged). */
+
+.media-frame.pad { padding: 18px 16px; }
+.media-frame.pad img { width: 100%; height: auto; }
+
+/* two figures side by side, stacked on narrow screens */
+.fig-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: center; }
+.fig-row.teaser { grid-template-columns: minmax(0, 2.15fr) minmax(0, 1fr); }
+.fig-row > * { min-width: 0; }
+.fig-row img { display: block; width: 100%; height: auto; }
+
+/* keyboard focus on the scrollable pseudocode and citation blocks */
+.terminal pre:focus-visible { outline: 2px solid var(--pl-blue); outline-offset: -2px; }
+@media (max-width: 760px) { .fig-row, .fig-row.teaser { grid-template-columns: 1fr; } }
+
+.fig-narrow { max-width: 760px; margin-left: auto; margin-right: auto; }
+
+/* technique legend for the motivation figure (the paper typesets it in LaTeX) */
+.tech-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--ui-sans); font-size: 13px;
+  color: var(--ink-soft); margin: 0 0 10px; }
+.tech-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.tech-legend i { display: inline-block; width: 11px; height: 11px; }
+
+/* our rows: tinted, method name in brand blue; only cells marked .best are emphasized */
+table.results tbody tr.ours { background: var(--pl-takeaway-bg); }
+table.results tbody tr.ours .method strong { color: var(--pl-blue); font-weight: 700; }
+
+/* .wrap sets margin: 0 auto, which drops the paragraph gap for p.wrap inside .wide sections */
+.wide > p.wrap { margin-bottom: 18px; }
+
+table.results td.fail { color: var(--pl-red); font-size: 14.5px; }
+table.results td.ok { color: var(--ink); }
+table.results tbody tr.grp-row td { text-align: left; font-family: var(--display); font-size: 12.5px; letter-spacing: 0.02em;
+  text-transform: uppercase; color: var(--pl-blue); padding-top: 12px; }

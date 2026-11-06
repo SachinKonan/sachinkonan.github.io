@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6M930EY73V"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6M930EY73V');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="MOMO hands the best solutions found by one language model to other models, which keep training from their own weights. It sets new records on circuit placement, qubit routing and the Erdős minimum overlap problem.">
+<title>MOMO: Mixture of Model Optimization</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232F5496'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='Palatino Linotype,Book Antiqua,Palatino,Georgia,serif' font-weight='700' font-size='40' fill='%23fff'%3EM%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,400..600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,400..600&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="assets/momo/style.css">
+<link rel="stylesheet" href="assets/momo/momo.css">
+</head>
+<body>
+<div class="shell">
+
+  <aside class="toc" aria-label="Contents">
+    <a class="toc-brand" href="#top" aria-label="MOMO">
+      <span class="brand-name">MOMO</span>
+    </a>
+    <div class="toc-label">Contents</div>
+    <nav>
+      <a href="#tldr"><span class="toc-n">1</span>TL;DR</a>
+      <a href="#setup"><span class="toc-n">2</span>Learning to improve</a>
+      <a href="#motivation"><span class="toc-n">3</span>Why combine models</a>
+      <a href="#method"><span class="toc-n">4</span>MOMO</a>
+      <a href="#results"><span class="toc-n">5</span>Results</a>
+      <a href="#erdos"><span class="toc-n">6</span>Erdős minimum overlap</a>
+      <a href="#placement"><span class="toc-n">7</span>Circuit placement</a>
+      <a href="#routing"><span class="toc-n">8</span>Qubit routing</a>
+      <a href="#limits"><span class="toc-n">9</span>Limitations</a>
+      <a href="#citation"><span class="toc-n">10</span>Citation</a>
+    </nav>
+    <div class="toc-foot">
+      Konan, Liu · 2026<br>Princeton University
+    </div>
+  </aside>
+
+  <main id="top">
+
+    <header class="hero" data-screen-label="Hero">
+      <div class="wrap">
+        <h1><span class="pl">MOMO</span>: Mixture of Model Optimization</h1>
+        <p class="authors">Sachin Konan &nbsp; Zhuang Liu</p>
+        <p class="affil">Princeton University</p>
+        <div class="hero-links">
+          <a href="#" data-todo="code-url">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.86 8.37 6.84 9.73.5.1.68-.22.68-.49v-1.9c-2.78.62-3.37-1.22-3.37-1.22-.45-1.19-1.11-1.51-1.11-1.51-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.86.09-.67.35-1.12.63-1.38-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.71 0 0 .84-.28 2.75 1.04A9.33 9.33 0 0 1 12 6.96c.85 0 1.7.12 2.5.34 1.9-1.32 2.74-1.04 2.74-1.04.55 1.4.2 2.45.1 2.71.64.71 1.03 1.62 1.03 2.74 0 3.93-2.34 4.79-4.57 5.04.36.32.68.95.68 1.92v2.82c0 .27.18.59.69.49A10.07 10.07 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z"></path></svg>
+            Code
+          </a>
+          <a href="#" data-todo="hf-url">
+            <img src="assets/momo/hf-logo.png" alt="" width="18" height="18" style="display:block">
+            Hugging Face
+          </a>
+          <a href="#" data-todo="arxiv-url">
+            <img src="assets/momo/arxiv-logo.svg" alt="" width="13" height="18" style="display:block">
+            arXiv
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- 1 -->
+    <section id="tldr" data-screen-label="TL;DR">
+      <div class="wide">
+        <p class="eyebrow">TL;DR</p>
+        <h2 class="sec">Several models find what no single model found.</h2>
+        <p class="wrap" style="margin-left:0">Reinforcement learning can train a language model to keep improving its
+          own solutions to a single hard problem. But each model eventually settles into its own habits, and further
+          training rarely changes them. <span class="pl">MOMO</span> takes the best solutions one model has found and
+          hands them to other models, which continue training from their own weights. With three open models of about
+          30B parameters, MOMO sets new records on circuit placement, qubit routing and the Erdős minimum overlap
+          problem.</p>
+        <figure>
+          <div class="media-frame pad">
+            <div class="fig-row teaser">
+              <img src="assets/momo/teaser_landscape.svg" alt="Three models climb to separate local peaks of a reward landscape. MOMO continues from the best peak with another model and reaches a higher peak.">
+              <img src="assets/momo/teaser_flow.svg" alt="The MOMO procedure. Every model trains in round 1. The best model's state buffer then seeds every other model in the next round, while that model sits out.">
+            </div>
+          </div>
+          <figcaption><span class="fig-n">Figure 1.</span> On the left, each model alone climbs to its own peak. Continuing
+          the best one with a different model reaches solutions that no single model found. On the right, MOMO runs in
+          rounds. After each round, the best model's buffer of solutions seeds every other model.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- 2 -->
+    <section id="setup" data-screen-label="Learning to improve">
+      <div class="wrap">
+        <p class="eyebrow">Setup</p>
+        <h2 class="sec">A model learns to improve its own solutions to one problem.</h2>
+        <p>We give a model a problem description and an evaluator. The model writes code, and running the code either
+          produces a valid solution or fails. There is no training set, only the one problem, and only the best solution
+          found counts. So instead of sampling fresh answers, the model edits solutions it has already found, and the
+          edits that score higher are reinforced. This is test-time training, the setting of
+          TTT-Discover. The weights change while the search
+          runs.</p>
+        <p>A state buffer keeps every scored program together with the program it came from. Each step picks promising
+          programs from the buffer, asks the model for many edits of each, scores them, and keeps the best children.</p>
+        <figure>
+          <div class="media-frame pad fig-narrow">
+            <img src="assets/momo/refine.svg" alt="The refinement loop. The model takes parents from the state buffer, proposes candidates, and the evaluator scores them. The policy is updated and the best children go back into the buffer.">
+          </div>
+          <figcaption><span class="fig-n">Figure 2.</span> One refinement step. The evaluator's score is the reward for
+          a policy-gradient update, and the best children join the buffer.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- 3 -->
+    <section id="motivation" data-screen-label="Why combine models">
+      <div class="wide">
+        <p class="eyebrow">Motivation</p>
+        <h2 class="sec">Each model settles into its own way of solving a problem.</h2>
+        <p class="wrap" style="margin-left:0">Search with language models tends to converge. Independent runs of the same
+          research agent plateau in separate "idea basins". Concurrent work escapes them by forking the agent into
+          branches that keep its workspace but start with a fresh context, then continuing from the best branch
+          (<a class="link" href="https://arxiv.org/abs/2610.07447">Fork-and-Flush</a>). Reinforcement learning with
+          verifiable rewards narrows a model onto fewer kinds of correct solutions, even when its accuracy holds, which
+          replaying one example of each solution mode can undo
+          (<a class="link" href="https://arxiv.org/abs/2610.11064">Re:Max</a>). And sampling answers in parallel often
+          beats refining one answer after another, mostly because conditioning on earlier answers explores less
+          (<a class="link" href="https://arxiv.org/abs/2604.05868">Gu et al.</a>).</p>
+        <p class="wrap" style="margin-left:0">We see the same pattern when a model is trained on a single problem. On the
+          Erdős minimum overlap problem, we trained four models under two objectives (GRPO and TTT-Discover), and Qwen
+          also with a KL penalty or with random restarts. Then we looked at the techniques in the best programs at the
+          end of each run. Each run relies on a few techniques, and the mix depends mostly on the model. Qwen and Gemma both settle on a smooth
+          surrogate solved with SLSQP. Muse compiles its inner loops with Numba, which the others almost never do.
+          Changing the objective barely moves Qwen and Gemma. Restarting a run does make its techniques more varied, but
+          it throws away what the run has found.</p>
+        <figure>
+          <div class="media-frame pad">
+            <div class="tech-legend">
+              <span><i style="background:#6E6E6E"></i>Smooth max</span>
+              <span><i style="background:#A9A9A9"></i>SLSQP</span>
+              <span><i style="background:#DC8969"></i>FFT correlation</span>
+              <span><i style="background:#1B76D2"></i>L-BFGS-B</span>
+              <span><i style="background:#4F9D8A"></i>Differential evolution</span>
+              <span><i style="background:#D9A93F"></i>Numba JIT</span>
+            </div>
+            <img src="assets/momo/algo_patterns.svg" alt="Technique frequencies in the best programs. Qwen and Gemma favor smooth max with SLSQP, Muse uses Numba, the objective changes the mix mostly for Muse and GPT-OSS, and restarts diversify Qwen.">
+          </div>
+          <figcaption><span class="fig-n">Figure 3.</span> Techniques used by the 32 best programs at the end of training.
+          On the left, four models under two objectives. On the right, Qwen with different regularizers. Each tile sums
+          to one.</figcaption>
+        </figure>
+        <p class="wrap" style="margin-left:0; margin-top:18px">Fork-and-Flush keeps an agent's work but restarts its
+          context. We wanted the same for a model trained on one problem, and a different model is a stronger change than
+          a fresh context. This suggested a different kind of restart. Keep the best solutions found so far, but continue
+          from them with a different model.</p>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- 4 -->
+    <section id="method" data-screen-label="MOMO">
+      <div class="wrap">
+        <p class="eyebrow">Method</p>
+        <h2 class="sec">MOMO restarts across models, not within one.</h2>
+        <p>MOMO reuses the refinement loop above and runs it for several models in rounds. In the first round, every
+          model refines on the problem alone, from its own buffer. When the round ends, we take the model whose buffer
+          holds the best solution.</p>
+        <p>In the next round, every other model continues from a copy of that buffer. We reset the copy's visit counts, so
+          the next model chooses where to search for itself rather than following where the previous model searched. Each
+          model keeps its own trained weights from the round before, so it brings what it has already learned to someone
+          else's solutions. Only its optimizer state is reset. The model whose buffer was copied sits the round out. We ran
+          three rounds.</p>
+        <div class="terminal">
+          <div class="terminal-head"><span></span><span></span><span></span><span class="term-title">MOMO, in pseudocode</span></div>
+          <pre tabindex="0" role="region" aria-label="MOMO pseudocode"><code><span class="tok-cmt"># refine() is the loop in Figure 2. Each call starts with a fresh optimizer.</span>
+winner = <span class="tok-key">None</span>
+
+<span class="tok-key">for</span> steps <span class="tok-key">in</span> round_steps:
+    <span class="tok-key">for</span> model <span class="tok-key">in</span> models:
+        <span class="tok-key">if</span> model == winner:
+            <span class="tok-key">continue</span>  <span class="tok-cmt"># the winner sits this round out</span>
+
+        <span class="tok-key">if</span> winner <span class="tok-key">is</span> <span class="tok-key">None</span>:
+            start = buffers[model]  <span class="tok-cmt"># round 1, its own buffer</span>
+        <span class="tok-key">else</span>:
+            start = copy(buffers[winner])
+            reset_visit_counts(start)
+
+        weights[model], buffers[model] = refine(problem, weights[model], start, steps)
+
+    winner = model_with_best_solution(buffers)
+
+<span class="tok-key">return</span> best_solution(buffers[winner])</code></pre>
+        </div>
+        <p style="margin-top:22px">The solutions move from model to model, and the weights stay with each model. Models
+          share nothing else, so MOMO itself does not change when another model family joins. We use three open models of
+          about 30B parameters, Qwen3.5-27B, Gemma-4-31B and Muse-Glimmer-30B, each trained with LoRA and the same
+          recipe.</p>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- 5 -->
+    <section id="results" data-screen-label="Results">
+      <div class="wide">
+        <p class="eyebrow">Results</p>
+        <h2 class="sec">New records on three of four problems.</h2>
+        <p class="wrap" style="margin-left:0">We ran MOMO for three rounds on two mathematical constructions (Erdős
+          minimum overlap and the first autocorrelation inequality, AC1) and two hardware problems (circuit placement
+          and qubit routing). On every problem, the best solution came from a lineage that passed through at least
+          two models. On AC1, MOMO improves in every round and beats SimpleTES, but it stays behind the best agents.</p>
+        <figure>
+          <div class="media-frame pad">
+            <img src="assets/momo/trees.svg" alt="MOMO trees per problem. Each row is a round and each box sequence a lineage of models. Gold outlines mark new state-of-the-art results on Erdős, placement and routing.">
+          </div>
+          <figcaption><span class="fig-n">Figure 4.</span> Each row is a round, and each sequence of boxes is a lineage,
+          for example Gemma followed by Qwen. A gold outline marks a new state of the art, and an asterisk the best
+          solution in each tree.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- 6 -->
+    <section id="erdos" data-screen-label="Erdős minimum overlap">
+      <div class="wide">
+        <p class="eyebrow">Mathematical discovery</p>
+        <h2 class="sec">A new bound on the Erdős minimum overlap problem.</h2>
+        <p class="wrap" style="margin-left:0">Split the numbers <span class="katex-inline" data-tex="1,\dots,2n">1, …, 2n</span>
+          into two sets of equal size, shift one set, and count how many of its numbers land on the other. The problem asks for the
+          split whose worst shift overlaps least. Its limiting constant <span class="katex-inline" data-tex="C_5"><var>C</var><sub>5</sub></span>
+          is unknown, and any valid step function gives an upper bound, so lower is better. MOMO proves
+          <span class="katex-inline" data-tex="C_5 \le 0.3808567"><var>C</var><sub>5</sub> ≤ 0.3808567</span>, below the previous record, and is the first
+          method since TTT-Discover to set it by training weights rather than by search alone.</p>
+        <figure>
+          <div class="media-frame pad">
+            <div class="fig-row">
+              <img src="assets/momo/erdos_sota.svg" alt="Upper bound on C5 over recent methods. MOMO is lowest.">
+              <img src="assets/momo/erdos_seeds.svg" alt="Three seeds with Qwen and Muse. MOMO reaches a lower bound than either model trained alone in every seed.">
+            </div>
+          </div>
+          <figcaption><span class="fig-n">Figure 5.</span> On the left, the record over recent methods, from AlphaEvolve
+          to EinsteinArena. On the right, three seeds with Qwen and Muse. MOMO beats training either model alone in each seed.</figcaption>
+        </figure>
+        <p class="wrap" style="margin-left:0; margin-top:18px">The winning lineage is Qwen, then Muse, then Qwen again,
+          and each model contributed something different. Qwen optimized a smooth surrogate. Muse moved the function to a
+          finer grid and restarted from noisy copies of the best one. Qwen then replaced Muse's random local search with
+          a single optimization round, which gave the final gain. The resulting construction looks unlike the previous
+          record.</p>
+        <figure>
+          <div class="media-frame pad">
+            <img src="assets/momo/erdos_vs_sota.svg" alt="Step functions of the previous state of the art, the best single model, and MOMO's record.">
+          </div>
+          <figcaption><span class="fig-n">Figure 6.</span> The previous record (left) uses many pieces in a few blocks.
+          MOMO's record (right) uses far fewer pieces spread over more blocks. The middle panel is the best single model.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- 7 -->
+    <section id="placement" data-screen-label="Circuit placement">
+      <div class="wide">
+        <p class="eyebrow">Hardware optimization</p>
+        <h2 class="sec">MOMO beats the circuit placement challenge winners under the challenge's own evaluator.</h2>
+        <p class="wrap" style="margin-left:0">The <a class="link" href="https://github.com/partcleda/macro-place-challenge-2026">Partcl/HRT
+          Macro Placement Challenge</a> asks for a program that places a chip's large blocks, such as memories, without
+          overlap. Each placement gets a proxy cost that combines wirelength, density and routing congestion, averaged
+          over 17 IBM designs. The model has to write a placement algorithm, not a single placement.</p>
+        <p class="wrap" style="margin-left:0">This comparison was run after the challenge closed, so MOMO was not a contest entry.
+          To compare fairly with the two winners, ArchGen and AbuPlace, we re-ran their released code unmodified next to
+          MOMO's program, gave every method the same time per design (3,000 seconds, under
+          the challenge's one-hour limit), and scored every result with the challenge's own evaluator. Our re-runs of the
+          winners land within 0.15% of their leaderboard scores.</p>
+        <div class="table-wrap">
+          <table class="results">
+            <caption><span class="fig-n">Table 1.</span> All methods re-run and scored with the challenge's evaluator.
+              Means over the 17 designs and over repeated runs. The placement program was found by Qwen continuing Gemma's programs.</caption>
+            <thead>
+              <tr class="metrics">
+                <th class="lft">Method</th><th>Mean proxy cost, 17 IBM designs ↓</th><th>Leaderboard</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="lft method"><strong>ArchGen</strong><span>1st place, human-designed</span></td><td>0.9520</td><td>0.9507</td></tr>
+              <tr><td class="lft method"><strong>AbuPlace</strong><span>2nd place, human-designed</span></td><td>0.9513</td><td>0.9522</td></tr>
+              <tr class="divider"><td colspan="3"></td></tr>
+              <tr class="ours"><td class="lft method"><strong>MOMO</strong><span>Gemma → Qwen, 300 s search</span></td><td>0.9297</td><td>n/a</td></tr>
+              <tr class="ours"><td class="lft method"><strong>MOMO</strong><span>Gemma → Qwen, 3,000 s</span></td><td class="best">0.9131</td><td>n/a</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <figure>
+          <div class="media-frame pad">
+            <img src="assets/momo/placement_ibm.svg" alt="Proxy cost per IBM design relative to the better of the two winners. MOMO is lower on 14 of 17 designs.">
+          </div>
+          <figcaption><span class="fig-n">Figure 7.</span> Proxy cost on each design, relative to the better of the two
+          winners on that design. MOMO is ahead on 14 of 17 designs.</figcaption>
+        </figure>
+        <p class="wrap" style="margin-left:0; margin-top:18px">Gemma alone was the strongest single model. Qwen,
+          continuing Gemma's programs, put more weight on routing congestion, which is where the remaining cost was.</p>
+        <figure>
+          <div class="media-frame pad">
+            <img src="assets/momo/ibm07_hotspots.svg" alt="IBM07 placements over estimated routing congestion for AbuPlace, Gemma alone and Qwen continuing Gemma.">
+          </div>
+          <figcaption><span class="fig-n">Figure 8.</span> IBM07 placements over the estimated routing congestion, with
+          hotspots in red. From left to right, AbuPlace, Gemma alone, and Qwen continuing Gemma.</figcaption>
+        </figure>
+
+        <h3 class="sub">With added spacing, MOMO also passes the full OpenROAD flow.</h3>
+        <p class="wrap" style="margin-left:0">A low proxy cost does not guarantee that later chip design steps succeed. The
+          challenge's second tier checks this by running placements through the full OpenROAD flow on four public NG45
+          designs. It builds the power grid, routes every wire, and measures timing. We first fixed a one-line bug in the
+          challenge's flow script that left every block unplaced, for all methods. Out of the box, MOMO's placements then
+          failed on three of the four designs. In our runs, the failures came where the program packs memory blocks into tight
+          columns. Once the flow spaces them 12 µm apart, the strips left between stacked blocks were too thin for the
+          power grid to reach. ArchGen and
+          OpenROAD's own macro placer fail the same way on the two ariane designs.</p>
+        <figure>
+          <div class="media-frame pad">
+            <img src="assets/momo/placement_gaps.svg" alt="Histograms of vertical gaps between stacked macros on ariane133 for MOMO, ArchGen, AbuPlace and MOMO with spacing.">
+          </div>
+          <figcaption><span class="fig-n">Figure 9.</span> The gap from each block to the block stacked above it on
+          ariane133, after the flow's 12 µm spacing. The dashed line marks the 36 µm spacing we added.</figcaption>
+        </figure>
+        <p class="wrap" style="margin-left:0; margin-top:18px">The fix leaves the search program untouched. We give it
+          blocks enlarged by 36 µm vertically and 12 µm horizontally, so every layout it accepts keeps that spacing, while
+          the cost is still computed with the real sizes. With this, MOMO passes the power grid on all four designs, has
+          the lowest proxy cost on all four, and completes every design that any method completes. Its timing is mixed.
+          It ties or beats AbuPlace on the two ariane designs and trails the other methods on mempool_tile, and every
+          method fails global routing on nvdla.</p>
+        <figure>
+          <div class="media-frame pad">
+            <img src="assets/momo/placement_ng45.svg" alt="Proxy cost on four NG45 designs. MOMO is lowest on all four.">
+          </div>
+          <figcaption><span class="fig-n">Figure 10.</span> Proxy cost on the four NG45 designs. MOMO here keeps the 36 µm
+          spacing and searches for only 300 seconds, a tenth of the winners' budget.</figcaption>
+        </figure>
+        <div class="table-wrap">
+          <table class="results">
+            <caption><span class="fig-n">Table 2.</span> Timing after the full OpenROAD flow, in ns. Each cell gives the worst
+              slack, the margin of the slowest path, and the total negative slack summed over failing paths. Higher is
+              better, and a nonnegative worst slack means the design meets its clock. Single runs. On nvdla no method
+              gets through global routing with this OpenROAD version.</caption>
+            <thead>
+              <tr class="metrics">
+                <th class="lft">Method</th><th>ariane133</th><th>ariane136</th><th>mempool_tile</th><th>nvdla</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="ours"><td class="lft method"><strong>MOMO</strong><span>with spacing</span></td>
+                <td class="best">−1.584 / −97.2</td><td class="best">+0.219 / 0</td><td>−2.183 / −15,054</td><td class="fail">routing fails</td></tr>
+              <tr><td class="lft method"><strong>AbuPlace</strong></td>
+                <td>−1.584 / −98.9</td><td>+0.172 / 0</td><td>−2.094 / −14,434</td><td class="fail">routing fails</td></tr>
+              <tr><td class="lft method"><strong>ArchGen</strong></td>
+                <td class="fail">power grid fails</td><td class="fail">power grid fails</td><td>−2.122 / −14,719</td><td class="fail">routing fails</td></tr>
+              <tr><td class="lft method"><strong>OpenROAD macro placer</strong></td>
+                <td class="fail">power grid fails</td><td class="fail">power grid fails</td><td class="best">−1.983 / −13,868</td><td class="fail">routing fails</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- 8 -->
+    <section id="routing" data-screen-label="Qubit routing">
+      <div class="wide">
+        <p class="eyebrow">Hardware optimization</p>
+        <h2 class="sec">The fewest SWAPs on the SimpleTES routing benchmark.</h2>
+        <p class="wrap" style="margin-left:0">A quantum circuit often asks two qubits to interact when they are not
+          neighbors on the processor. A router fixes this by inserting SWAP operations, and each SWAP costs three CNOT
+          gates, so fewer is better. We use SimpleTES's routing benchmark, with 24 circuits on each of three processor layouts.
+          The model writes the Rust policy that picks the initial layout and every SWAP.</p>
+        <div class="table-wrap">
+          <table class="results">
+            <caption><span class="fig-n">Table 3.</span> SWAPs added across 24 circuits per processor. Lower is
+              better.</caption>
+            <thead>
+              <tr class="metrics">
+                <th class="lft">Method</th><th>Q20</th><th>Heron</th><th>Willow</th><th>Total SWAPs ↓</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="lft method"><strong>SABRE</strong><span>heuristic</span></td><td>22,714</td><td>50,186</td><td>38,352</td><td>111,252</td></tr>
+              <tr><td class="lft method"><strong>LightSABRE</strong><span>heuristic</span></td><td>20,063</td><td>45,827</td><td>36,802</td><td>102,692</td></tr>
+              <tr><td class="lft method"><strong>SimpleTES</strong><span>Gemini 3 Pro</span></td><td>13,470</td><td>42,396</td><td class="best">31,481</td><td>87,347</td></tr>
+              <tr><td class="lft method"><strong>Hyra</strong><span>agent</span></td><td class="best">12,623</td><td class="best">41,534</td><td>31,966</td><td>86,123</td></tr>
+              <tr class="divider"><td colspan="5"></td></tr>
+              <tr class="ours"><td class="lft method"><strong>MOMO</strong><span>Gemma → Muse → Gemma</span></td><td>12,810</td><td>41,540</td><td>31,752</td><td class="best">86,102</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="wrap" style="margin-left:0">Gemma alone already beats every previous routing program except the Hyra
+          agent. Muse, continuing Gemma's programs, mostly weakened a decay penalty in Gemma's policy, and Gemma, taking
+          Muse's programs back, polished it further. Together they edge past Hyra.</p>
+        <figure>
+          <div class="media-frame pad">
+            <img src="assets/momo/routing_performance.svg" alt="Routing reward over lineage steps for Gemma, then Gemma to Muse, then Gemma to Muse to Gemma, passing Hyra.">
+          </div>
+          <figcaption><span class="fig-n">Figure 11.</span> Routing reward over the search, one line per round. The right
+          panel enlarges rounds 2 and 3.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- 9 -->
+    <section id="limits" data-screen-label="Limitations">
+      <div class="wrap">
+        <p class="eyebrow">Limitations</p>
+        <h2 class="sec">Most results are single runs.</h2>
+        <p>Most of our searches are single runs per configuration. We repeated the Erdős experiment over three seeds, and
+          MOMO beat single-model training in each, but the other problems have one run each. MOMO does not win
+          everywhere. On AC1 it stays behind the best agents, and on circuit placement a third round added nothing. Our
+          OpenROAD results are single runs on four public designs, without the challenge's hidden designs or its
+          reference baselines. They show that MOMO's placements can pass the flow, not that they would win the
+          challenge's second tier.</p>
+        <p>We have not measured how the gains grow with the number of models, and matching the placement programs'
+          runtime does not match the compute spent to discover them. Since models share only their solutions, more model
+          families and more rounds are cheap to try.</p>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <section id="citation" class="citation-band" data-screen-label="Citation">
+      <div class="wrap">
+        <p class="eyebrow">Citation</p>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap">
+          <h2 class="sec" style="margin:0">Cite <span class="pl">MOMO</span></h2>
+        </div>
+        <div class="terminal bibtex">
+          <div class="terminal-head"><span></span><span></span><span></span><span class="term-title">momo.bib</span><button type="button" class="term-copy" data-copy-target="cite-code" aria-label="Copy BibTeX citation" title="Copy"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"></path></svg><svg class="ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></button></div>
+          <pre tabindex="0" role="region" aria-label="BibTeX citation"><code id="cite-code">@misc{konan2026momo,
+  <span class="bt-k">title</span>  = <span class="bt-v">{MOMO: Mixture of Model Optimization}</span>,
+  <span class="bt-k">author</span> = <span class="bt-v">{Konan, Sachin and Liu, Zhuang}</span>,
+  <span class="bt-k">year</span>   = <span class="bt-v">{2026}</span>
+}</code></pre>
+        </div>
+      </div>
+      <div class="site-foot">
+        <span class="pl">MOMO</span> · Konan, Liu · Princeton University · 2026
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* Layout JS from the PaperScorer blog: TOC scroll-spy, terminal copy buttons, KaTeX pass. */
+(function () {
+  "use strict";
+  var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  function initScrollSpy() {
+    var links = $$(".toc nav a[href^='#']");
+    var map = {};
+    links.forEach(function (a) {
+      var id = a.getAttribute("href").slice(1);
+      if (document.getElementById(id)) map[id] = a;
+    });
+    var ids = Object.keys(map);
+    function onScroll() {
+      var y = window.scrollY + 140;
+      var current = ids[0];
+      ids.forEach(function (id) {
+        var sec = document.getElementById(id);
+        if (sec && sec.offsetTop <= y) current = id;
+      });
+      if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2) current = ids[ids.length - 1];
+      links.forEach(function (a) { a.classList.remove("active"); });
+      if (map[current]) map[current].classList.add("active");
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
+  function legacyCopy(txt) {
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = txt; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy") ? resolve() : reject(new Error("execCommand copy failed")); }
+      catch (e) { reject(e); }
+      document.body.removeChild(ta);
+    });
+  }
+  function copyText(txt) {
+    if (navigator.clipboard && window.isSecureContext)
+      return navigator.clipboard.writeText(txt).catch(function () { return legacyCopy(txt); });
+    return legacyCopy(txt);
+  }
+  function initCopy() {
+    $$(".term-copy").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var src = document.getElementById(btn.dataset.copyTarget);
+        if (!src) return;
+        copyText(src.textContent.replace(/\s+$/, "") + "\n").then(function () {
+          btn.classList.add("copied"); btn.setAttribute("title", "Copied");
+          clearTimeout(btn._t);
+          btn._t = setTimeout(function () { btn.classList.remove("copied"); btn.setAttribute("title", "Copy"); }, 1600);
+        });
+      });
+    });
+  }
+
+  function renderMath() {
+    if (!window.katex) { setTimeout(renderMath, 60); return; }
+    $$(".katex-inline[data-tex]").forEach(function (n) {
+      try { window.katex.render(n.getAttribute("data-tex"), n, { throwOnError: false }); } catch (e) {}
+    });
+    $$(".katex-block[data-tex]").forEach(function (n) {
+      try { window.katex.render(n.getAttribute("data-tex"), n, { displayMode: true, throwOnError: false }); } catch (e) {}
+    });
+  }
+
+  function boot() { initScrollSpy(); initCopy(); renderMath(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+})();
+</script>
+</body></html>
