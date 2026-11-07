@@ -281,6 +281,21 @@ winner = <span class="tok-key">None</span>
           Macro Placement Challenge</a> asks for a program that places a chip's large blocks, such as memories, without
           overlap. Each placement gets a proxy cost that combines wirelength, density and routing congestion, averaged
           over 17 IBM designs. The model has to write a placement algorithm, not a single placement.</p>
+        <!-- Looping video rendered from the same snapshots as Figure 10 by website/scripts/make_placement_video.py
+             (called from make_placement_evolution.py). -->
+        <figure>
+          <div class="media-frame">
+            <video class="pe-video" autoplay muted loop playsinline preload="metadata" width="1280" height="660"
+              poster="assets/momo/placement_evolution.jpg"
+              aria-label="Three placement programs, Gemma alone, Qwen alone and Gemma then Qwen, rearranging the blocks of one chip from the same start layout.">
+              <source src="assets/momo/placement_evolution.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption><span class="fig-n">Figure 7.</span> <!-- gen:pe-video-caption -->Gemma alone, Qwen alone and Gemma → Qwen (MOMO), each placing ibm06 for 300 seconds from the same start layout. First the shared start layout is built.<!-- /gen:pe-video-caption -->
+          Blocks and cell clusters are drawn at true size. Dark clusters moved in the last 9 seconds, thin lines show how
+          far things moved from the start, and red marks crowded wiring. Playback is slower at the start of the search,
+          where most of the change happens.</figcaption>
+        </figure>
         <p class="wrap" style="margin-left:0">This comparison was run after the challenge closed, so MOMO was not a contest entry.
           To compare fairly with the two winners, ArchGen and AbuPlace, we re-ran their released code unmodified next to
           MOMO's program, gave every method the same time per design (3,000 seconds, under
@@ -308,7 +323,7 @@ winner = <span class="tok-key">None</span>
           <div class="media-frame pad">
             <img src="assets/momo/placement_ibm.svg" alt="Proxy cost per IBM design relative to the better of the two winners. MOMO is lower on 14 of 17 designs.">
           </div>
-          <figcaption><span class="fig-n">Figure 7.</span> Proxy cost on each design, relative to the better of the two
+          <figcaption><span class="fig-n">Figure 8.</span> Proxy cost on each design, relative to the better of the two
           winners on that design. MOMO is ahead on 14 of 17 designs.</figcaption>
         </figure>
         <p class="wrap" style="margin-left:0; margin-top:18px">Gemma alone was the strongest single model. Qwen,
@@ -317,15 +332,13 @@ winner = <span class="tok-key">None</span>
           <div class="media-frame pad">
             <img src="assets/momo/ibm07_hotspots.svg" alt="IBM07 placements over estimated routing congestion for AbuPlace, Gemma alone and Qwen continuing Gemma.">
           </div>
-          <figcaption><span class="fig-n">Figure 8.</span> IBM07 placements over the estimated routing congestion, with
+          <figcaption><span class="fig-n">Figure 9.</span> IBM07 placements over the estimated routing congestion, with
           hotspots in red. From left to right, AbuPlace, Gemma alone, and Qwen continuing Gemma.</figcaption>
         </figure>
-        <p class="wrap" style="margin-left:0; margin-top:18px">Each round's best program is itself an optimizer. Below,
-          the best program after each round places the same chip from the same start for 300 seconds, and we replay one
-          run of each. We show one IBM chip, ibm01, and one NG45 chip, ariane133. On both, each later round ends a little
-          lower, though the gap between rounds 2 and 3 is within the noise of a single run.</p>
-        <!-- Placement evolution, built by website/scripts/make_placement_evolution.py. Panels marked "synthetic data"
-             are stand-ins until the real snapshot files exist. Re-run the script to refresh. -->
+        <!-- Figures 7, 10 and 11, the chip buttons (assets/momo/placement_chips.js) and the text between gen:NAME
+             markers are all written by website/scripts/make_placement_evolution.py from the snapshot files. Edit the
+             wording in that script's prose() and re-run it, not here. -->
+        <p class="wrap" style="margin-left:0; margin-top:18px"><!-- gen:pe-intro -->Each model alone writes a placement program that is itself an optimizer. Below, the best program of Gemma alone, of Qwen alone, and of Qwen continuing Gemma's programs (Gemma → Qwen) each place the same chip from the same start for 300 seconds, and we replay one run of each. We show ibm06 and nvdla. Gemma → Qwen ends lowest, 0.9% below the better single model on ibm06 and 2.1% below the better single model on nvdla. These are single runs.<!-- /gen:pe-intro --></p>
         <figure>
           <div class="media-frame pad">
             <div class="pe" data-pe-base="assets/momo/">
@@ -333,21 +346,40 @@ winner = <span class="tok-key">None</span>
                 <button class="pe-play" type="button" aria-label="Play"></button>
                 <input class="pe-scrub" type="range" min="0" max="1000" value="0" aria-label="Time through each run">
                 <span class="pe-time" aria-live="off">start</span>
-                <div class="pe-chips" role="group" aria-label="Chip">
-                  <button type="button" data-chip="ibm01" aria-pressed="true">ibm01</button>
-                  <button type="button" data-chip="ariane133" aria-pressed="false">ariane133</button>
-                </div>
+                <div class="pe-chips" role="group" aria-label="Chip"></div>
               </div>
+              <div class="pe-legend"></div>
               <div class="pe-panels"></div>
             </div>
-            <noscript><img src="assets/momo/placement_evolution_ibm01.svg" alt="ibm01 placements at five points in one run of each round's best program."></noscript>
-            <img class="pe-print" loading="lazy" src="assets/momo/placement_evolution_ibm01.svg" alt="ibm01 placements at five points in one run of each round's best program.">
+            <noscript><img src="assets/momo/placement_evolution.svg" alt="Placements at five points in one run of each of the three programs."></noscript>
+            <img class="pe-print" loading="lazy" src="assets/momo/placement_evolution.svg" alt="Placements at five points in one run of each of the three programs.">
           </div>
-          <figcaption><span class="fig-n">Figure 9.</span> One run of the best program after each MOMO round, from the
-          same start. Blocks are drawn at true size. The line under each chip is the lowest cost so far, and the gray line
-          is the cost of the layout being tried.</figcaption>
+          <figcaption><span class="fig-n">Figure 10.</span> The runs of Figure 7, step by step. Blocks and cell clusters
+          are at true size and position. Thin lines join each one to where it was when the search began, and dashed
+          outlines mark where moved blocks started. <!-- gen:pe-caption -->On ibm06 and nvdla the replay first shows the shared start layout being built.<!-- /gen:pe-caption --> Under each chip, the
+          colored line is the lowest cost so far and the gray line is the cost of the layout being tried.</figcaption>
         </figure>
+        <p class="wrap" style="margin-left:0; margin-top:18px"><!-- gen:pt-prose -->On ibm06, most of the cost drop is congestion for all three programs. The lead of Gemma → Qwen over both single models is mostly congestion. On nvdla, most of the cost drop is density for all three programs. The lead of Gemma → Qwen over both single models is mostly density.<!-- /gen:pt-prose --></p>
+        <figure>
+          <div class="media-frame pad">
+            <div class="pt" data-pt-base="assets/momo/">
+              <div class="pt-bar"></div>
+              <div class="pt-legend"></div>
+              <div class="pt-panels"></div>
+              <div class="pt-cards"></div>
+            </div>
+            <noscript><img src="assets/momo/placement_tradeoff.svg" alt="Change in wirelength, density and congestion over one run of each of the three programs."></noscript>
+            <img class="pt-print" loading="lazy" src="assets/momo/placement_tradeoff.svg" alt="Change in wirelength, density and congestion over one run of each of the three programs.">
+          </div>
+          <figcaption><span class="fig-n">Figure 11.</span> The three parts of the cost over the same runs, as the change
+          from the shared start, with each part weighted as in the cost. By default each panel is zoomed to the
+          differences between programs, with its own y-axis, so the steep drop of the first seconds runs off the top.
+          "Full range" puts all three panels on one axis. The numbered moments are described below the chart, each with that program's layout and lines from
+          where things were when the window began.</figcaption>
+        </figure>
+        <script defer src="assets/momo/placement_chips.js"></script>
         <script defer src="assets/momo/placement_evolution.js"></script>
+        <script defer src="assets/momo/placement_tradeoff.js"></script>
 
         <h3 class="sub">With added spacing, MOMO also passes the full OpenROAD flow.</h3>
         <p class="wrap" style="margin-left:0">A low proxy cost does not guarantee that later chip design steps succeed. The
@@ -362,7 +394,7 @@ winner = <span class="tok-key">None</span>
           <div class="media-frame pad">
             <img src="assets/momo/placement_gaps.svg" alt="Histograms of vertical gaps between stacked macros on ariane133 for MOMO, ArchGen, AbuPlace and MOMO with spacing.">
           </div>
-          <figcaption><span class="fig-n">Figure 10.</span> The gap from each block to the block stacked above it on
+          <figcaption><span class="fig-n">Figure 12.</span> The gap from each block to the block stacked above it on
           ariane133, after the flow's 12 µm spacing. The dashed line marks the 36 µm spacing we added.</figcaption>
         </figure>
         <p class="wrap" style="margin-left:0; margin-top:18px">The fix leaves the search program untouched. We give it
@@ -375,7 +407,7 @@ winner = <span class="tok-key">None</span>
           <div class="media-frame pad">
             <img src="assets/momo/placement_ng45.svg" alt="Proxy cost on four NG45 designs. MOMO is lowest on all four.">
           </div>
-          <figcaption><span class="fig-n">Figure 11.</span> Proxy cost on the four NG45 designs. MOMO here keeps the 36 µm
+          <figcaption><span class="fig-n">Figure 13.</span> Proxy cost on the four NG45 designs. MOMO here keeps the 36 µm
           spacing and searches for only 300 seconds, a tenth of the winners' budget.</figcaption>
         </figure>
         <div class="table-wrap">
@@ -441,7 +473,7 @@ winner = <span class="tok-key">None</span>
           <div class="media-frame pad">
             <img src="assets/momo/routing_performance.svg" alt="Routing reward over lineage steps for Gemma, then Gemma to Muse, then Gemma to Muse to Gemma, passing Hyra.">
           </div>
-          <figcaption><span class="fig-n">Figure 12.</span> Routing reward over the search, one line per round. The right
+          <figcaption><span class="fig-n">Figure 14.</span> Routing reward over the search, one line per round. The right
           panel enlarges rounds 2 and 3.</figcaption>
         </figure>
       </div>

@@ -53,21 +53,71 @@ table.results tbody tr.grp-row td { text-align: left; font-family: var(--display
 .pe-panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; min-height: 120px; }
 .pe-panel { min-width: 0; display: flex; flex-direction: column; }
 .pe-panel canvas { display: block; }
-.pe-cost { margin-top: 8px; }
+.pe-cost { margin-top: 4px; }
 /* titles may wrap to different heights; bottom-align them so the three chips line up */
 .pe-title { font-size: 13px; line-height: 1.3; margin-bottom: 6px; flex: 1 0 auto; display: flex; flex-direction: column;
   justify-content: flex-end; }
 .pe-round, .pe-lineage, .pe-synth { display: block; }
 .pe-synth { color: var(--pl-red); font-size: 11px; }
-.pe-read { font-size: 12.5px; margin-top: 3px; font-variant-numeric: tabular-nums; }
-.pe-phase { font-size: 12px; color: var(--ink-mute); min-height: 1.3em; }
-.media-frame img.pe-print { display: none; }
+.pe-time { min-width: 15em; }
+/* running cost under each chip */
+.pe-read { margin-top: 6px; font-variant-numeric: tabular-nums; display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: 0 8px; }
+.pe-cost-v { font-size: 16px; }
+.pe-cost-d { font-size: 12.5px; color: var(--ink-soft); }
+/* key: swatches drawn like the marks in the panels */
+.pe-legend, .pt-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; margin: -4px 0 12px; }
+.pe-legend span, .pt-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.pe-sw { display: inline-block; width: 12px; height: 10px; flex: none; }
+.pe-sw-block { background: rgba(72, 62, 140, 0.5); border: 1px solid #483e8c; }
+.pe-sw-soft { background: rgba(110, 110, 104, 0.26); }
+.pe-sw-hot { background: rgba(0, 0, 0, 0.6); }
+.pe-sw-trail { height: 0; width: 16px; border-top: 1px solid rgba(0, 0, 0, 0.6); }
+.pe-sw-map { width: 40px; background: linear-gradient(90deg, #fff, #fde0c5, #f4a582, #d6604d, #aa0000); border: 1px solid #ccc; }
+.media-frame img.pe-print, .media-frame img.pt-print { display: none; }
 @media (max-width: 560px) {
   .pe-panels { gap: 8px; }
   .pe-title { font-size: 11.5px; }
-  .pe-read { font-size: 11px; }
-  .pe-phase { font-size: 10.5px; }
+  .pe-cost-v { font-size: 12.5px; }
+  .pe-cost-d { font-size: 10.5px; }
   .pe-time { min-width: 0; }
   .pe-chips { margin-left: 0; }
+  .pe-legend, .pt-legend { font-size: 11.5px; gap: 3px 12px; }
 }
 @media print { .pe { display: none; } .media-frame img.pe-print { display: block; } }
+
+/* looping placement video at the top of the placement section */
+.pe-video { display: block; width: 100%; height: auto; background: #fff; }
+
+/* cost trade-off chart (assets/momo/placement_tradeoff.js): three parts of the cost over time, with callouts */
+.pt { font-family: Helvetica, Arial, sans-serif; color: #000; }
+.pt-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; font-size: 13px; }
+.pt-setslot { display: contents; }
+.pt-group { display: inline-flex; border: 1px solid #000; border-radius: 4px; overflow: hidden; }
+.pt-group button { font: inherit; font-size: 13px; padding: 4px 11px; border: 0; background: #fff; color: #000; cursor: pointer; }
+.pt-group button + button { border-left: 1px solid #000; }
+.pt-group button[aria-pressed="true"] { background: var(--pl-blue); color: #fff; }
+.pt-group button:focus-visible { outline: 2px solid var(--pl-blue); outline-offset: -2px; }
+.pt-line { display: inline-block; width: 18px; height: 2px; }
+.pt-panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.pt-panel { min-width: 0; }
+.pt-panel canvas { display: block; }
+.pt-ptitle { font-size: 13px; margin: 0 0 2px 54px; display: flex; flex-wrap: wrap; gap: 0 6px; align-items: baseline; }
+.pt-pdesc { font-size: 11.5px; color: var(--ink-soft); }
+.pt-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 16px;
+  border-top: 1px solid var(--rule); padding-top: 14px; }
+.pt-card { min-width: 0; }
+.pt-chead { font-size: 13px; margin-bottom: 6px; display: flex; align-items: center; flex-wrap: wrap; }
+.pt-num { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; flex: none;
+  border: 1.2px solid #000; border-radius: 50%; font-size: 11px; margin-right: 7px; }
+.pt-when { color: var(--ink-soft); }
+.pt-inset { display: block; }
+.pt-text { font-size: 13px; line-height: 1.45; margin: 8px 0 0; color: #000; }
+@media (max-width: 760px) { .pt-cards { grid-template-columns: 1fr; } .pt-inset { float: left; margin: 0 12px 4px 0; }
+  .pt-card { overflow: hidden; } }
+@media (max-width: 560px) {
+  .pt-panels { grid-template-columns: 1fr; gap: 10px; }
+  .pt-group button { font-size: 12px; padding: 4px 8px; }
+  .pt-text { font-size: 12.5px; }
+}
+@media print { .pt { display: none; } .media-frame img.pt-print { display: block; } }
